@@ -34,7 +34,7 @@ public class EstadoPage extends Fragment {
     TextView viewX, viewY, viewZ; // textviews para se ver os valores do acelerómetro
 
     // Tempo de trabalho
-    TextView textViewTempoTrabalhoContabilizado; // textview que
+    TextView textViewTempoTrabalhoContabilizado; // textview que mostra ao utilizador o tempo de trabalho que já foi contabilizado
 
 
     @Override
@@ -53,7 +53,11 @@ public class EstadoPage extends Fragment {
         Observer<String> textViewEstadoObserver = novoEstado -> {
             switch (novoEstado){
                 case "DESLIGADO": coloredTextView(textViewEstado, "red", "Desligado"); break;
-                case "FORA_AREA_DE_TRABALHO": coloredTextView(textViewEstado, "red", "Fora da área de trabalho"); break;
+                case "FORA_AREA_DE_TRABALHO": {
+                    sensorManager.unregisterListener(accelerometerEventListener);
+                    coloredTextView(textViewEstado, "red", "Fora da área de trabalho");
+                    break;
+                }
                 case "DENTRO_AREA_PARADO": coloredTextView(textViewEstado, "red", "Em pausa"); break;
                 case "DENTRO_AREA_EM_MOVIMENTO": coloredTextView(textViewEstado, "green", "Trabalho em curso..."); break;
             }
