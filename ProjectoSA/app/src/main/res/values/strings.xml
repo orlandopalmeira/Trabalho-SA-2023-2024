@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ProjectoSA</string>
+    <!--Títulos das Tabs-->
+    <string name="tabMapa">Mapa</string>
+    <string name="tabEstado">Estado</string>
+    <string name="tabHistorico">Histórico</string>
+</resources>
