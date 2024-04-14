@@ -4,18 +4,16 @@ import android.os.SystemClock;
 
 import com.example.projectosa.utils.Observer;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EstadoApp {
     private static String estado = "DESLIGADO"; // estado da monitorização
-    private static List<Observer<String>> observersEstado = new ArrayList<>(); // Observadores do estado da aplicação
+    private static final List<Observer<String>> observersEstado = new ArrayList<>(); // Observadores do estado da aplicação
     private static Float oldXacc = 0.0f, oldYacc = 0.0f, oldZacc = 0.0f; // valores do acelerómetro anteriores
     private static Long milissegundosDeTrabalho = 0L; // Tempo de trabalho útil (em movimento e dentro da geovedação) contabilizado.
     private static long startTime = 0;
-    private static List<Observer<Long>> observersSegundosTrabalho = new ArrayList<>();
+    private static final List<Observer<Long>> observersSegundosTrabalho = new ArrayList<>();
 
     private static boolean moving = false; // indica se o telemóvel está em movimento
 
@@ -82,11 +80,7 @@ public class EstadoApp {
         }
     }
     // Outros métodos úteis
-    private static long secondsBetweenDateTime(LocalDateTime ldt1, LocalDateTime ldt2){
-        if(ldt1 == null || ldt2 == null) return 1;
-        Duration duration = Duration.between(ldt1,ldt2);
-        return Math.abs(duration.getSeconds());
-    }
+
     private static void updateSegundosDeTrabalho(){
         if(moving){
             long endTime = SystemClock.elapsedRealtime();

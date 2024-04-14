@@ -18,8 +18,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.projectosa.R;
-import com.example.projectosa.state.*;
+import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
+import com.example.projectosa.utils.Utils;
 
 import java.util.Locale;
 
@@ -54,7 +55,6 @@ public class EstadoPage extends Fragment {
             switch (novoEstado){
                 case "DESLIGADO": coloredTextView(textViewEstado, "red", "Desligado"); break;
                 case "FORA_AREA_DE_TRABALHO": {
-                    sensorManager.unregisterListener(accelerometerEventListener);
                     coloredTextView(textViewEstado, "red", "Fora da área de trabalho");
                     break;
                 }
@@ -64,7 +64,7 @@ public class EstadoPage extends Fragment {
         };
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
         // Este observer permite à textView do tempo contabilizado ser actualizada
-        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> textViewTempoTrabalhoContabilizado.setText(milisecondsToFormattedString(novoTempo));
+        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> textViewTempoTrabalhoContabilizado.setText(Utils.milisecondsToFormattedString(novoTempo));
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
         return rootView;
     }
@@ -83,13 +83,14 @@ public class EstadoPage extends Fragment {
     /**
      * Para meter texto numa textview colorido com uma certa cor.
      */
-    private void coloredTextView(TextView textView, String color, String text){
-        switch (color){
-            case "red":   textView.setTextColor(ContextCompat.getColor(requireContext(),R.color.red)); break; // cores definidas no ficheiro app/res/values/colors.xml
-            case "green": textView.setTextColor(ContextCompat.getColor(requireContext(),R.color.green)); break;
-            default:      textView.setTextColor(ContextCompat.getColor(requireContext(),R.color.black)); break;
+    private void coloredTextView(TextView textView, String color_name, String text){
+        int color = R.color.black;
+        switch (color_name){
+            case "red":   color = R.color.red; break; // cores definidas no ficheiro app/res/values/colors.xml
+            case "green": color = R.color.green; break;
         }
-        textView.setText(text);
+        textView.setTextColor(ContextCompat.getColor(requireContext(),color)); // altera a cor
+        textView.setText(text); // altera o texto-
     }
 
     /**
@@ -141,15 +142,4 @@ public class EstadoPage extends Fragment {
         }
     }
 
-    /**
-     * Função que converte um long (segundos) para o formato H:M:s em string
-     */
-    private String milisecondsToFormattedString(long milissegundos){
-        long segundos = milissegundos/1000;
-        long horas = segundos / 3600;
-        long minutos = (segundos % 3600) / 60;
-        long segundosRestantes = segundos % 60;
-
-        return String.format(Locale.getDefault(),"%02d:%02d:%02d", horas, minutos, segundosRestantes);
-    }
 }
