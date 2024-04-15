@@ -2,7 +2,6 @@ package com.example.projectosa.pages;
 
 import android.os.Bundle;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -14,8 +13,6 @@ import com.example.projectosa.R;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
-
-import java.util.Locale;
 
 public class MapaPage extends Fragment {
     TextView textViewEstado_mapa, textViewTempo_mapa;

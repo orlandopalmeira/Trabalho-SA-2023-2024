@@ -14,7 +14,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         switch (position){
-            case 0: return new EstadoPage();
+            //case 0: return new EstadoPage();
             case 1: return new MapaPage();
             case 2: return new HistoricoPage();
             default: return new EstadoPage();

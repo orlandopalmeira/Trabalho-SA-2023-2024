@@ -8,7 +8,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -16,8 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.projectosa.R;
+import com.example.projectosa.data.Database;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
@@ -45,7 +46,7 @@ public class EstadoPage extends Fragment {
         textViewEstado = rootView.findViewById(R.id.textViewEstado);
         textViewTempoTrabalhoContabilizado = rootView.findViewById(R.id.textViewTempoTrabalhoContabilizado);
         switchLigado = rootView.findViewById(R.id.switchLigado);
-        coloredTextView(textViewEstado, "red", "Desligado");
+        Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
         switchLigado.setChecked(false);
 
         handleSwitch();
@@ -53,13 +54,13 @@ public class EstadoPage extends Fragment {
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
         Observer<String> textViewEstadoObserver = novoEstado -> {
             switch (novoEstado){
-                case "DESLIGADO": coloredTextView(textViewEstado, "red", "Desligado"); break;
+                case "DESLIGADO": Utils.coloredTextView(textViewEstado, "red", "Desligado", this); break;
                 case "FORA_AREA_DE_TRABALHO": {
-                    coloredTextView(textViewEstado, "red", "Fora da área de trabalho");
+                    Utils.coloredTextView(textViewEstado, "red", "Fora da área de trabalho", this);
                     break;
                 }
-                case "DENTRO_AREA_PARADO": coloredTextView(textViewEstado, "red", "Em pausa"); break;
-                case "DENTRO_AREA_EM_MOVIMENTO": coloredTextView(textViewEstado, "green", "Trabalho em curso..."); break;
+                case "DENTRO_AREA_PARADO": Utils.coloredTextView(textViewEstado, "red", "Em pausa", this); break;
+                case "DENTRO_AREA_EM_MOVIMENTO": Utils.coloredTextView(textViewEstado, "green", "Trabalho em curso...", this); break;
             }
         };
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
@@ -81,19 +82,6 @@ public class EstadoPage extends Fragment {
     }
 
     /**
-     * Para meter texto numa textview colorido com uma certa cor.
-     */
-    private void coloredTextView(TextView textView, String color_name, String text){
-        int color = R.color.black;
-        switch (color_name){
-            case "red":   color = R.color.red; break; // cores definidas no ficheiro app/res/values/colors.xml
-            case "green": color = R.color.green; break;
-        }
-        textView.setTextColor(ContextCompat.getColor(requireContext(),color)); // altera a cor
-        textView.setText(text); // altera o texto-
-    }
-
-    /**
      * Prepara tudo o que é relativo ao switch que o utilizador usa para indicar se quer ou não a monitorização da aplicação.
      * */
     private void handleSwitch(){
@@ -102,9 +90,16 @@ public class EstadoPage extends Fragment {
             if (isChecked) {// O Switch está ligado
                 sensorManager.registerListener(accelerometerEventListener, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
             } else {// O Switch está desligado
-                coloredTextView(textViewEstado, "red", "Desligado");
+                Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
                 sensorManager.unregisterListener(accelerometerEventListener);
                 EstadoApp.setDesligado();
+                // Adiciona o registo na base de dados
+                Database.addWorkTime(EstadoApp.getWorkTimeData()).addOnSuccessListener(documentReference -> {
+                    Toast.makeText(this.getContext(), "Informação registada no sistema", Toast.LENGTH_SHORT).show();
+                }).addOnFailureListener(ex -> {
+                    ex.printStackTrace(); // DEBUG - mostra o erro que acontece
+                    Toast.makeText(this.getContext(), "Erro a registar a informação no sistema.", Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }
