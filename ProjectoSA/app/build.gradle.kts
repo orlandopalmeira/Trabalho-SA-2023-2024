@@ -36,22 +36,20 @@ android {
 }
 
 dependencies {
-    // Firestore database
-        // Import the BoM for the Firebase platform
+    // Firestore database + auth
         implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
-        // Declare the dependency for the Cloud Firestore library
-        // When using the BoM, you don't specify versions in Firebase library dependencies
         implementation("com.google.firebase:firebase-auth")
         implementation("com.google.firebase:firebase-firestore")
+        implementation("com.google.android.gms:play-services-auth:21.0.0")
 
     // O que veio de origem
         implementation("androidx.appcompat:appcompat:1.6.1")
         implementation("com.google.android.material:material:1.11.0")
         implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.annotation:annotation:1.7.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    testImplementation("junit:junit:4.13.2")
+        implementation("androidx.annotation:annotation:1.7.1")
+        implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+        implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+        testImplementation("junit:junit:4.13.2")
         androidTestImplementation("androidx.test.ext:junit:1.1.5")
         androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
