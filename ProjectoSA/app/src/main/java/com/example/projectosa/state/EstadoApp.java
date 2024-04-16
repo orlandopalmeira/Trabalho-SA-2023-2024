@@ -4,6 +4,7 @@ import android.os.SystemClock;
 
 import com.example.projectosa.data.WorkTime;
 import com.example.projectosa.utils.Observer;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,8 @@ public class EstadoApp {
     private EstadoApp() {} // Esta classe não foi feita para ser instanciada.
 
     public static WorkTime getWorkTimeData(){
-        //TODO: Tratar da parte do id do trabalhador
-        return new WorkTime("TODO", milissegundosDeTrabalho/1000);
+        assert FirebaseAuth.getInstance().getCurrentUser() != null; // evita warnings
+        return new WorkTime(FirebaseAuth.getInstance().getCurrentUser().getUid(), milissegundosDeTrabalho/1000);
     }
     /**
      * Altera o estado da aplicação tendo em conta a informação do acelerómetro e a verificação da presença do utilizador no interior da geovedação.
