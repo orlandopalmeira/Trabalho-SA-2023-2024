@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1014462085395",
+    "project_id": "sensorizacaoambiente-9ce13",
+    "storage_bucket": "sensorizacaoambiente-9ce13.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014462085395:android:1dbc0c2fe7ff27220f02e6",
+        "android_client_info": {
+          "package_name": "com.example.projectosa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1014462085395-v46fvok10nqjdemstscis64568a9kigt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.projectosa",
+            "certificate_hash": "147ca2bfb70f5dba1d19b9d330377cc4b7b53a9a"
+          }
+        },
+        {
+          "client_id": "1014462085395-s5ss7tn1kdhgj6g9i3bd5ng1id1fkf7o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBL8Yu9Lu2EpLQunVfRLiHPTm_J7rVW63A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1014462085395-s5ss7tn1kdhgj6g9i3bd5ng1id1fkf7o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
