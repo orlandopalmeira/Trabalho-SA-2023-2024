@@ -25,7 +25,6 @@ import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
 
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -52,15 +51,15 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
         textViewEstado_mapa = rootView.findViewById(R.id.textViewEstado_mapa);
         textViewTempo_mapa = rootView.findViewById(R.id.textViewTempo_mapa);
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
-        Observer<String> textViewEstadoObserver = novoEstado -> {
+        Observer<Integer> textViewEstadoObserver = novoEstado -> {
             switch (novoEstado){
-                case "DESLIGADO": Utils.coloredTextView(textViewEstado_mapa, "red", "Desligado", this); break;
-                case "FORA_AREA_DE_TRABALHO": {
+                case EstadoApp.DESLIGADO: Utils.coloredTextView(textViewEstado_mapa, "red", "Desligado", this); break;
+                case EstadoApp.FORA_DA_AREA: {
                     Utils.coloredTextView(textViewEstado_mapa, "red", "Fora da área de trabalho", this);
                     break;
                 }
-                case "DENTRO_AREA_PARADO": Utils.coloredTextView(textViewEstado_mapa, "red", "Em pausa", this); break;
-                case "DENTRO_AREA_EM_MOVIMENTO": Utils.coloredTextView(textViewEstado_mapa, "green", "Trabalho em curso...", this); break;
+                case EstadoApp.DENTRO_AREA_PARADO: Utils.coloredTextView(textViewEstado_mapa, "red", "Em pausa", this); break;
+                case EstadoApp.DENTRO_AREA_EM_MOVIMENTO: Utils.coloredTextView(textViewEstado_mapa, "green", "Trabalho em curso...", this); break;
             }
         };
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
@@ -148,9 +147,7 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
-        map.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
-                .title("Marker"));
+        //TODO: Convém colocar o marker na localização do user.
         addMarkerFromCityName("Braga");
         desenharGeofences();
     }
