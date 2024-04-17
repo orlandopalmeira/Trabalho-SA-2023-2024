@@ -37,7 +37,6 @@ public class Database {
         // asynchronous operation:
         new Thread(() -> {
             try {
-                // Placeholder for your real network interaction
                 QuerySnapshot querySnapshot = Tasks.await(dbGeofences.get());
                 List<Geofence> result = querySnapshot.toObjects(Geofence.class);
                 source.setResult(result);

@@ -32,15 +32,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -135,7 +131,7 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
         taskGetGeofences.addOnSuccessListener(geofences -> {
             for (Geofence geofence: geofences) {
                 CircleOptions circleOptions = new CircleOptions();
-                circleOptions.center(new LatLng(geofence.getLatitude(), geofence.getLongitude()));
+                circleOptions.center(geofence.getLatLng());
                 circleOptions.radius(geofence.getRadius()); // raio em metros
                 circleOptions.strokeWidth(2);
                 circleOptions.strokeColor(Color.RED);
