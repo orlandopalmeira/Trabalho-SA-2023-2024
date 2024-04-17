@@ -1,6 +1,6 @@
 package com.example.projectosa.pages;
 
-import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -15,9 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.projectosa.MainActivity;
 import com.example.projectosa.R;
+import com.example.projectosa.data.Database;
+import com.example.projectosa.data.Geofence;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
@@ -29,9 +32,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,7 +48,7 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
     private TextView textViewEstado_mapa, textViewTempo_mapa;
     private GoogleMap map;
     private Geocoder geocoder;
-    @SuppressLint("SetTextI18n")
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -120,6 +129,25 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
         viewPager.setUserInputEnabled(true);
     }
 
+    private void desenharGeofences(){
+        Task<List<Geofence>> taskGetGeofences = Database.getGeofences();
+
+        taskGetGeofences.addOnSuccessListener(geofences -> {
+            for (Geofence geofence: geofences) {
+                CircleOptions circleOptions = new CircleOptions();
+                circleOptions.center(new LatLng(geofence.getLatitude(), geofence.getLongitude()));
+                circleOptions.radius(geofence.getRadius()); // raio em metros
+                circleOptions.strokeWidth(2);
+                circleOptions.strokeColor(Color.RED);
+                circleOptions.fillColor(Color.argb(70, 150, 50, 50));
+                map.addCircle(circleOptions);
+            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(requireContext(), "Erro a obter as geovedações", Toast.LENGTH_SHORT).show();
+            Log.d("MapaPage", e.getMessage());
+        });
+    }
+
     // Get a handle to the GoogleMap object and display marker.
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -128,6 +156,7 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
                 .position(new LatLng(0, 0))
                 .title("Marker"));
         addMarkerFromCityName("Braga");
+        desenharGeofences();
     }
 
     private void addMarkerFromCityName(String cityName)  {
