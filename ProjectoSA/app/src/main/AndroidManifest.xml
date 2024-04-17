@@ -28,6 +28,10 @@
             android:name=".MainActivity"
             android:exported="false">
         </activity>
+        <!--API Key do google maps-->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyADyvGElsNPEaa4CoXbrmmWh5vro0-I7Gc" />
     </application>
 
 </manifest>

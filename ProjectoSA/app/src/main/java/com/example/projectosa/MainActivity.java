@@ -4,13 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback;
 import android.os.Bundle;
+import android.widget.Toast;
+
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener;
 import com.example.projectosa.pages.ViewPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    TabLayout tabLayout; // aquela barra com as páginas que o user quer seleccionar
-    ViewPager2 viewPager; // para permitir a "deslocação" entre páginas
+    private TabLayout tabLayout; // aquela barra com as páginas que o user quer seleccionar
+    private ViewPager2 viewPager; // para permitir a "deslocação" entre páginas
     ViewPagerAdapter viewPagerAdapter; // para permitir a "deslocação" entre páginas
 
     @Override
@@ -43,4 +45,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    public TabLayout getTabLayout() {
+        return tabLayout;
+    }
+
+    public ViewPager2 getViewPager(){
+        return viewPager;
+    }
+
 }
