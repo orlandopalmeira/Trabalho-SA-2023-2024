@@ -1,19 +1,29 @@
 package com.example.projectosa;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.viewpager2.widget.ViewPager2;
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback;
-import android.os.Bundle;
-import android.widget.Toast;
 
+import android.Manifest;
+import android.os.Bundle;
+
+import com.example.projectosa.state.EstadoApp;
+import com.example.projectosa.utils.LocationHelper;
+import com.example.projectosa.utils.Observer;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener;
 import com.example.projectosa.pages.ViewPagerAdapter;
+import com.google.android.gms.maps.model.LatLng;
+
 
 public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout; // aquela barra com as páginas que o user quer seleccionar
     private ViewPager2 viewPager; // para permitir a "deslocação" entre páginas
     ViewPagerAdapter viewPagerAdapter; // para permitir a "deslocação" entre páginas
+
+    // Localização
+    private LocationHelper locationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,19 +41,35 @@ public class MainActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
             }
+
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
         viewPager.registerOnPageChangeCallback(new OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 TabLayout.Tab tab = tabLayout.getTabAt(position);
-                if (tab != null) tab.select();// o IF evita o warning: "Method invocation 'select' may produce 'NullPointerException'"
+                if (tab != null)
+                    tab.select();// o IF evita o warning: "Method invocation 'select' may produce 'NullPointerException'"
             }
         });
+        // Vai buscar as geofences ao Firestore database
+        EstadoApp.fetchGeofences();
+        // Localização geográfica
+        // Solicitação das permissões de localização
+        ActivityCompat.requestPermissions(this,
+                new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                LocationHelper.REQUEST_LOCATION_CODE); // é apenas um código de requisição de permissão, pode-se usar qualquer valor
+
+        Observer<LatLng> locationObserver = EstadoApp::updateInsideGeofences;
+        locationHelper = new LocationHelper(this.getApplicationContext(), locationObserver);
+        locationHelper.requestLocationUpdates();
     }
 
     public TabLayout getTabLayout() {
@@ -53,5 +79,6 @@ public class MainActivity extends AppCompatActivity {
     public ViewPager2 getViewPager(){
         return viewPager;
     }
+
 
 }

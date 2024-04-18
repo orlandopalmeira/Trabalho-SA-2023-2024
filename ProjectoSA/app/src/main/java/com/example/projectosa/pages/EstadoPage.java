@@ -96,6 +96,7 @@ public class EstadoPage extends Fragment {
                 // Adiciona o registo na base de dados
                 Database.addWorkTime(EstadoApp.getWorkTimeData()).addOnSuccessListener(documentReference -> {
                     Toast.makeText(this.getContext(), "Informação registada no sistema", Toast.LENGTH_SHORT).show();
+                    EstadoApp.restartWorkTime();
                 }).addOnFailureListener(ex -> {
                     ex.printStackTrace(); // DEBUG - mostra o erro que acontece
                     Toast.makeText(this.getContext(), "Erro a registar a informação no sistema.", Toast.LENGTH_SHORT).show();

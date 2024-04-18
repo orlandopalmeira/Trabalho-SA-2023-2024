@@ -43,6 +43,8 @@ dependencies {
         implementation("com.google.android.gms:play-services-auth:21.0.0")
     // Google maps
         implementation("com.google.android.gms:play-services-maps:18.2.0")
+    // Localização
+        implementation("com.google.android.gms:play-services-location:21.2.0")
 
 
     // O que veio de origem

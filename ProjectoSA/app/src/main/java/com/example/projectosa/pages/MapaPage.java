@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.example.projectosa.MainActivity;
 import com.example.projectosa.R;
-import com.example.projectosa.data.Database;
 import com.example.projectosa.data.Geofence;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
@@ -31,7 +30,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.gms.maps.model.CircleOptions;
 
@@ -125,9 +123,8 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
     }
 
     private void desenharGeofences(){
-        Task<List<Geofence>> taskGetGeofences = Database.getGeofences();
-
-        taskGetGeofences.addOnSuccessListener(geofences -> {
+        List<Geofence> geofences = EstadoApp.getGeofences(); // Se der null, ou não tem geofences ou ainda não foi feito o fetch
+        if (geofences != null){
             for (Geofence geofence: geofences) {
                 CircleOptions circleOptions = new CircleOptions();
                 circleOptions.center(geofence.getLatLng());
@@ -137,10 +134,9 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
                 circleOptions.fillColor(Color.argb(70, 150, 50, 50));
                 map.addCircle(circleOptions);
             }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(requireContext(), "Erro a obter as geovedações", Toast.LENGTH_SHORT).show();
-            Log.d("MapaPage", e.getMessage());
-        });
+        } else {
+            Toast.makeText(requireContext(), "Sem geofences", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Get a handle to the GoogleMap object and display marker.
