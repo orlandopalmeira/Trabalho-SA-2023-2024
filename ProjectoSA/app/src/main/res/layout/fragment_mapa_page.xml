@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/frameLayout2"
     android:layout_width="match_parent"
-    android:layout_height="620dp"
+    android:layout_height="700dp"
     tools:context=".pages.MapaPage">
 
     <TextView
@@ -31,20 +31,29 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="438dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.666"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewEstado_mapa" />
 
     <Button
         android:id="@+id/botaoBloqueioDeslizamento"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="217dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="16dp"
         android:text="Bloquear deslizamento"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/goToLocationButton"
+        android:layout_width="216dp"
+        android:layout_height="56dp"
+        android:text="Ir para a minha localização"
+        app:layout_constraintBottom_toTopOf="@+id/botaoBloqueioDeslizamento"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/map"
+        app:layout_constraintVertical_bias="0.524" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

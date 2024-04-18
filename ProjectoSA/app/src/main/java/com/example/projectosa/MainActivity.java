@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                 LocationHelper.REQUEST_LOCATION_CODE); // é apenas um código de requisição de permissão, pode-se usar qualquer valor
 
-        Observer<LatLng> locationObserver = EstadoApp::updateInsideGeofences;
+        Observer<LatLng> locationObserver = EstadoApp::setCurrentLocation;
         locationHelper = new LocationHelper(this.getApplicationContext(), locationObserver);
         locationHelper.requestLocationUpdates();
     }

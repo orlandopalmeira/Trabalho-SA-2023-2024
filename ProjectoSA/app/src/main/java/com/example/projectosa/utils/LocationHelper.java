@@ -10,6 +10,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -17,16 +19,16 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class LocationHelper {
     public static final int REQUEST_LOCATION_CODE = 123;
-    private Context context;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
+    private final Context context;
+    private final LocationManager locationManager;
+    private final LocationListener locationListener;
 
     public LocationHelper(Context context, Observer<LatLng> locationObserver) {
         this.context = context;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
-            public void onLocationChanged(Location location) {
+            public void onLocationChanged(@NonNull Location location) {
                 // localização actual do utilizador
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();

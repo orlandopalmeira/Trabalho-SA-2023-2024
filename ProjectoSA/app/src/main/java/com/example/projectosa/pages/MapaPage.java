@@ -29,6 +29,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -40,6 +41,7 @@ import java.util.Locale;
 public class MapaPage extends Fragment implements OnMapReadyCallback {
     private TextView textViewEstado_mapa, textViewTempo_mapa;
     private GoogleMap map;
+    private Marker mapMarker;
     private Geocoder geocoder;
 
     @Override
@@ -84,6 +86,12 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
                 botaoBloqueioDeslizamento.setText("Bloquear deslizamento");
                 desbloquearTabLayout();
             }
+        });
+
+        // Botão que leva o mapa à localização do utilizador
+        Button goToLocationButton = rootView.findViewById(R.id.goToLocationButton);
+        goToLocationButton.setOnClickListener(view -> {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(EstadoApp.getCurrentLocation(), 20));
         });
         return rootView;
     }
@@ -143,9 +151,15 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
-        //TODO: Convém colocar o marker na localização do user.
-        addMarkerFromCityName("Braga");
+        mapMarker = map.addMarker(new MarkerOptions().position(EstadoApp.getCurrentLocation()));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(EstadoApp.getCurrentLocation(), 20));
         desenharGeofences();
+        // Observer da localização do utilizador para actualizar o mapa
+        Observer<LatLng> locationObserver = newLocation -> {
+            mapMarker.remove();
+            mapMarker = map.addMarker(new MarkerOptions().position(EstadoApp.getCurrentLocation()));
+        };
+        EstadoApp.registerLocationObserver(locationObserver);
     }
 
     private void addMarkerFromCityName(String cityName)  {

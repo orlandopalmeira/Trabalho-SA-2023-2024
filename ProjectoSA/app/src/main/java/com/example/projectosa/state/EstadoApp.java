@@ -30,6 +30,8 @@ public class EstadoApp {
     private static final List<Observer<Long>> observersSegundosTrabalho = new ArrayList<>();
     private static boolean moving = false; // indica se o telemóvel está em movimento
     private static List<Geofence> geofences = null; // geovedações registadas no sistema
+    private static LatLng currentLocation = null; // localização actual
+    private static final List<Observer<LatLng>> locationObservers = new ArrayList<>(); // observadores da localização
     private static boolean insideGeofences = false;
 
     private EstadoApp() {} // Esta classe não foi feita para ser instanciada.
@@ -37,10 +39,17 @@ public class EstadoApp {
     /**
      * Actualiza a localização actual
      */
-    public static void updateInsideGeofences(LatLng newLocation) {
-        insideGeofences = Geofence.insideOfGeofences(geofences, newLocation);
+    public static void setCurrentLocation(LatLng newLocation) {
+        currentLocation = newLocation;
+        insideGeofences = Geofence.insideOfGeofences(geofences, currentLocation);
+        for (Observer<LatLng> observer : locationObservers) {
+            observer.onVariableChanged(currentLocation);
+        }
     }
 
+    public static LatLng getCurrentLocation(){
+        return currentLocation != null ? currentLocation : new LatLng(0,0);
+    }
     /**
      * Vai à base de dados buscar as geofences e coloca no estado da aplicação.
      */
@@ -103,6 +112,9 @@ public class EstadoApp {
         }
 
         oldXacc = x; oldYacc = y; oldZacc = z; // Actualiza os valores do acelerómetro
+    }
+    public static void registerLocationObserver(Observer<LatLng> observer){
+        locationObservers.add(observer);
     }
     public static void registerEstadoObserver(Observer<Integer> observer){
         observersEstado.add(observer);
