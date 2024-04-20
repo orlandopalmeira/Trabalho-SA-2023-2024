@@ -47,7 +47,6 @@ public class EstadoPage extends Fragment {
         textViewTempoTrabalhoContabilizado = rootView.findViewById(R.id.textViewTempoTrabalhoContabilizado);
         switchLigado = rootView.findViewById(R.id.switchLigado);
         Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
-        switchLigado.setChecked(false);
 
         handleSwitch();
         handleAccelerometer(rootView);

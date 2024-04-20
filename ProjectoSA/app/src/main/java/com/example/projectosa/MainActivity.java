@@ -8,6 +8,7 @@ import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback;
 import android.Manifest;
 import android.os.Bundle;
 
+import com.example.projectosa.data.WorkTime;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.LocationHelper;
 import com.example.projectosa.utils.Observer;
@@ -15,6 +16,11 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener;
 import com.example.projectosa.pages.ViewPagerAdapter;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 
 public class MainActivity extends AppCompatActivity {
