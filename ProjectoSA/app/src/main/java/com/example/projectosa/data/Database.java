@@ -28,6 +28,15 @@ public class Database {
     }
 
     /**
+     * Função que regista a posição do utilizador numa determinada timestamp
+     */
+    public static Task<DocumentReference> addPosition(Position position){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference dbWorkTime = db.collection("positions");
+        return dbWorkTime.add(position.toMap());
+    }
+
+    /**
      * Obtém as geofences registadas no sistema.
      * Atenção: Ainda não se tem implementado o registo de geofences por um administrador, por isso as geofences são estáticas na base de dados.
      */

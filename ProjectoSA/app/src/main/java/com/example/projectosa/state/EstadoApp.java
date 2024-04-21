@@ -3,11 +3,15 @@ package com.example.projectosa.state;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.example.projectosa.data.Database;
 import com.example.projectosa.data.Geofence;
+import com.example.projectosa.data.Position;
 import com.example.projectosa.data.WorkTime;
 import com.example.projectosa.utils.Observer;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -42,6 +46,12 @@ public class EstadoApp {
     public static void setCurrentLocation(LatLng newLocation) {
         currentLocation = newLocation;
         insideGeofences = Geofence.insideOfGeofences(geofences, currentLocation);
+        if(currentState != DESLIGADO){ // Só regista a localização se o utilizador ligou a monitorização
+            Database.addPosition(new Position(newLocation)).addOnFailureListener(e -> {
+                try { throw e; }
+                catch (Exception ex) { throw new RuntimeException(ex); }
+            });
+        }
         for (Observer<LatLng> observer : locationObservers) {
             observer.onVariableChanged(currentLocation);
         }
