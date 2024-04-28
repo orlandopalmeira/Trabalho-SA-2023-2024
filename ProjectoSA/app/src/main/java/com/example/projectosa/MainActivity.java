@@ -1,5 +1,6 @@
 package com.example.projectosa;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.viewpager2.widget.ViewPager2;
@@ -8,7 +9,6 @@ import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback;
 import android.Manifest;
 import android.os.Bundle;
 
-import com.example.projectosa.data.WorkTime;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.LocationHelper;
 import com.example.projectosa.utils.Observer;
@@ -16,14 +16,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener;
 import com.example.projectosa.pages.ViewPagerAdapter;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
     private TabLayout tabLayout; // aquela barra com as páginas que o user quer seleccionar
     private ViewPager2 viewPager; // para permitir a "deslocação" entre páginas
     ViewPagerAdapter viewPagerAdapter; // para permitir a "deslocação" entre páginas
@@ -78,6 +73,11 @@ public class MainActivity extends AppCompatActivity {
         locationHelper.requestLocationUpdates();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        locationHelper.requestLocationUpdates();
+    }
     public TabLayout getTabLayout() {
         return tabLayout;
     }
