@@ -1,15 +1,12 @@
 package com.example.projectosa.pages;
 
 import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,15 +31,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.gms.maps.model.CircleOptions;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 
 public class MapaPage extends Fragment implements OnMapReadyCallback {
     private TextView textViewEstado_mapa, textViewTempo_mapa;
     private GoogleMap map;
     private Marker mapMarker;
-    private Geocoder geocoder;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,7 +66,6 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null; // evita warnings
         mapFragment.getMapAsync(this);
-        geocoder = new Geocoder(requireContext(), Locale.getDefault());
 
         // Botão de bloqueio de deslizamento de páginas
         Button botaoBloqueioDeslizamento = rootView.findViewById(R.id.botaoBloqueioDeslizamento);
@@ -160,21 +153,5 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
             mapMarker = map.addMarker(new MarkerOptions().position(EstadoApp.getCurrentLocation()));
         };
         EstadoApp.registerLocationObserver(locationObserver);
-    }
-
-    private void addMarkerFromCityName(String cityName)  {
-        try {
-            List<Address> addresses = geocoder.getFromLocationName(cityName, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                Address address = addresses.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                map.addMarker(new MarkerOptions().position(latLng).title(cityName));
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-            } else {
-                Log.e("MapaPage", "Nenhum endereço encontrado para " + cityName);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }
