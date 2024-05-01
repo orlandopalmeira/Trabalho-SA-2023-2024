@@ -22,6 +22,8 @@ import com.example.projectosa.data.Database;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 
 import java.util.Locale;
 
@@ -87,19 +89,23 @@ public class EstadoPage extends Fragment {
         // Código para lidar com a mudança de estado "ON/OFF" do Switch
         switchLigado.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {// O Switch está ligado
+                EstadoApp.setDentroDaAreaParado(); // "Em pausa..."
                 sensorManager.registerListener(accelerometerEventListener, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
             } else {// O Switch está desligado
                 Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
                 sensorManager.unregisterListener(accelerometerEventListener);
                 EstadoApp.setDesligado();
                 // Adiciona o registo na base de dados
-                Database.addWorkTime(EstadoApp.getWorkTimeData()).addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this.getContext(), "Informação registada no sistema", Toast.LENGTH_SHORT).show();
-                    EstadoApp.restartWorkTime();
-                }).addOnFailureListener(ex -> {
-                    ex.printStackTrace(); // DEBUG - mostra o erro que acontece
-                    Toast.makeText(this.getContext(), "Erro a registar a informação no sistema.", Toast.LENGTH_SHORT).show();
-                });
+                Task<DocumentReference> task = Database.addWorkTime(EstadoApp.getWorkTimeData());
+                if(task != null){ // Se der null é porque o registo ia com tempo = 0 e por isso não valia a pena enviar
+                    task.addOnSuccessListener(documentReference -> {
+                        Toast.makeText(this.getContext(), "Informação registada no sistema", Toast.LENGTH_SHORT).show();
+                        EstadoApp.restartWorkTime();
+                    }).addOnFailureListener(ex -> {
+                        ex.printStackTrace(); // DEBUG - mostra o erro que acontece
+                        Toast.makeText(this.getContext(), "Erro a registar a informação no sistema.", Toast.LENGTH_SHORT).show();
+                    });
+                }
             }
         });
     }
@@ -133,7 +139,7 @@ public class EstadoPage extends Fragment {
                 }
             };
         } else {
-            Log.d("EstadoPage", "Dispositivo não possui acelerómetro");
+            Log.e("DEBUG", "Dispositivo não possui acelerómetro");
         }
     }
 

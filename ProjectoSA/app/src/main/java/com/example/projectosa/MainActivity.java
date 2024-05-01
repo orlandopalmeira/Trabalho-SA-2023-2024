@@ -1,17 +1,22 @@
 package com.example.projectosa;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.viewpager2.widget.ViewPager2;
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback;
 
-import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.LocationHelper;
 import com.example.projectosa.utils.Observer;
+import com.example.projectosa.utils.Permissions;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener;
 import com.example.projectosa.pages.ViewPagerAdapter;
@@ -26,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     // Localização
     private LocationHelper locationHelper;
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // O que veio de origem com o projecto
@@ -62,21 +68,45 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         });
         // Vai buscar as geofences ao Firestore database
         EstadoApp.fetchGeofences();
+        // Permissões
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Permissions.requestPermissions(getApplicationContext(), this);
+        }
         // Localização geográfica
-        // Solicitação das permissões de localização
-        ActivityCompat.requestPermissions(this,
-                new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                LocationHelper.REQUEST_LOCATION_CODE); // é apenas um código de requisição de permissão, pode-se usar qualquer valor
-
         Observer<LatLng> locationObserver = EstadoApp::setCurrentLocation;
         locationHelper = new LocationHelper(this.getApplicationContext(), locationObserver);
-        locationHelper.requestLocationUpdates();
+        if(Permissions.allPermissions(getApplicationContext())){
+            locationHelper.requestLocationUpdates();
+            //Intent notificationServiceIntent = new Intent(this, NotificationService.class);
+            //startService(notificationServiceIntent);
+        } else if (Permissions.locationPermission(getApplicationContext())) {
+            locationHelper.requestLocationUpdates();
+        } else if (Permissions.notificationPermission(getApplicationContext())) {
+            //Intent notificationServiceIntent = new Intent(this, NotificationService.class);
+            //startService(notificationServiceIntent);
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-        locationHelper.requestLocationUpdates();
+        Log.e("DEBUG", "REQUESTCODE: " + requestCode);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == Permissions.NOTIFICATIONS_AND_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                //Intent notificationServiceIntent = new Intent(this, NotificationService.class);
+                //startForegroundService(notificationServiceIntent);
+                locationHelper.requestLocationUpdates();
+            }
+        } else if (requestCode == Permissions.NOTIFICATIONS_ONLY) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                //Intent notificationServiceIntent = new Intent(this, NotificationService.class);
+                //startForegroundService(notificationServiceIntent);
+            }
+        } else if (requestCode == Permissions.LOCATION_ONLY) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                locationHelper.requestLocationUpdates();
+            }
+        }
     }
     public TabLayout getTabLayout() {
         return tabLayout;

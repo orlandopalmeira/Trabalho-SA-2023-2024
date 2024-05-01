@@ -3,15 +3,12 @@ package com.example.projectosa.state;
 import android.os.SystemClock;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.example.projectosa.data.Database;
 import com.example.projectosa.data.Geofence;
 import com.example.projectosa.data.Position;
 import com.example.projectosa.data.WorkTime;
 import com.example.projectosa.utils.Observer;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -33,7 +30,7 @@ public class EstadoApp {
     private static long startTime = 0;
     private static final List<Observer<Long>> observersSegundosTrabalho = new ArrayList<>();
     private static boolean moving = false; // indica se o telemóvel está em movimento
-    private static List<Geofence> geofences = null; // geovedações registadas no sistema
+    private static List<Geofence> geofences = new ArrayList<>(); // geovedações registadas no sistema
     private static LatLng currentLocation = null; // localização actual
     private static final List<Observer<LatLng>> locationObservers = new ArrayList<>(); // observadores da localização
     private static boolean insideGeofences = false;
@@ -69,7 +66,7 @@ public class EstadoApp {
         taskGetGeofences.addOnSuccessListener(geofencesList -> {
             geofences = geofencesList;
         }).addOnFailureListener(e -> {
-            Log.e("EstadoApp", e.getMessage());
+            Log.e("DEBUG", e.getMessage());
         });
     }
 
@@ -101,23 +98,25 @@ public class EstadoApp {
     public static void updateAccelerometerData(Float x, Float y, Float z){
         double movement = Math.sqrt((x-oldXacc)*(x-oldXacc) + (y-oldYacc)*(y-oldYacc) + (z-oldZacc)*(z-oldZacc)); // "grau de movimento"
 
-        if (movement >= 0.75) { // Em movimento
-            if (insideGeofences) { // É aqui que o trabalhador está efectivamente a trabalhar
-                setDentroDaAreaEmMovimento();
-                if(!moving){
-                    startTime = SystemClock.elapsedRealtime();
-                    moving = true;
+        if(currentState != EstadoApp.DESLIGADO){
+            if (movement >= 0.75) { // Em movimento
+                if (insideGeofences) { // É aqui que o trabalhador está efectivamente a trabalhar
+                    setDentroDaAreaEmMovimento();
+                    if(!moving){
+                        startTime = SystemClock.elapsedRealtime();
+                        moving = true;
+                    }
+                } else {
+                    updateSegundosDeTrabalho();
+                    setForaDaArea();
                 }
-            } else {
+            } else { // Parado
                 updateSegundosDeTrabalho();
-                setForaDaArea();
-            }
-        } else { // Parado
-            updateSegundosDeTrabalho();
-            if (insideGeofences) {
-                setDentroDaAreaParado();
-            } else {
-                setForaDaArea();
+                if (insideGeofences) {
+                    setDentroDaAreaParado();
+                } else {
+                    setForaDaArea();
+                }
             }
         }
 
@@ -137,6 +136,8 @@ public class EstadoApp {
         for (Observer<Integer> observer: observersEstado) {
             observer.onVariableChanged(currentState);
         }
+        startTime = 0;
+        moving = false;
     }
     public static void setForaDaArea() {
         currentState = FORA_DA_AREA;

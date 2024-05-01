@@ -1,9 +1,7 @@
 package com.example.projectosa.utils;
 
-import android.Manifest;
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,10 +16,10 @@ import com.google.android.gms.maps.model.LatLng;
  * Classe para ajudar a utilizar o sensor de GPS. (Assume que o utilizador deu permissões de localização.)
  */
 public class LocationHelper {
-    public static final int REQUEST_LOCATION_CODE = 123;
     private final Context context;
     private final LocationManager locationManager;
     private final LocationListener locationListener;
+    private static boolean dontRepeat = false;
 
     public LocationHelper(Context context, Observer<LatLng> locationObserver) {
         this.context = context;
@@ -47,14 +45,15 @@ public class LocationHelper {
         };
     }
 
+    @SuppressLint("MissingPermission")
     public void requestLocationUpdates() {
-        if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!Permissions.locationPermission(context)) {
             // Se as permissões de localização não foram concedidas
             Toast.makeText(context, "Permissão de localização não concedida.", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        if (dontRepeat) return;
+        dontRepeat = true;
         Toast.makeText(context, "Existem permissões de localização", Toast.LENGTH_SHORT).show();
         // Registar para receber atualizações de localização
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);

@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                     // Autenticação falhou
                     assert task.getException() != null; // evita warnings
                     assert task.getException().getMessage() != null; // evita warnings
-                    Log.e("LoginActivity", task.getException().getMessage());
+                    Log.e("DEBUG", task.getException().getMessage());
                     Toast.makeText(LoginActivity.this, "A autenticação falhou", Toast.LENGTH_SHORT).show();
                 }
             });

@@ -22,9 +22,12 @@ public class Database {
      * Função que insere na base de dados o registo de trabalho de um utlizador.
      */
     public static Task<DocumentReference> addWorkTime(WorkTime worktime){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CollectionReference dbWorkTime = db.collection("work_time");
-        return dbWorkTime.add(worktime.toMap());
+        if(worktime.getSegundosDeTrabalho() > 0){
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            CollectionReference dbWorkTime = db.collection("work_time");
+            return dbWorkTime.add(worktime.toMap());
+        }
+        return null;
     }
 
     /**
