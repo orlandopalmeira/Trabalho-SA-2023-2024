@@ -55,9 +55,12 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         buttonLogin.setOnClickListener((View view) -> {
-            Intent signInIntent = client.getSignInIntent();
-            // Inicia a activity de login do Google
-            launcher.launch(signInIntent);
+            client.signOut().addOnCompleteListener(this, task -> {
+                // Sign out completo
+                Intent signInIntent = client.getSignInIntent();
+                // Inicia a activity de login do Google
+                launcher.launch(signInIntent);
+            });
         });
     }
 

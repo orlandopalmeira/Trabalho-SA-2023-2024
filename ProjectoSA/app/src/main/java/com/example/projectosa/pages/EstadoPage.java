@@ -10,9 +10,12 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.projectosa.LoginActivity;
+import com.example.projectosa.MainActivity;
 import com.example.projectosa.R;
 import com.example.projectosa.data.Database;
 import com.example.projectosa.services.MonitoringService;
@@ -20,6 +23,7 @@ import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 
 import java.time.LocalDateTime;
@@ -29,6 +33,9 @@ public final class EstadoPage extends Fragment {
     SwitchCompat switchLigado; // Activa ou desactiva a monitorização da aplicação.
     //TextView viewX, viewY, viewZ; // textviews para se ver os valores do acelerómetro
     TextView textViewTempoTrabalhoContabilizado; // textview que mostra ao utilizador o tempo de trabalho que já foi contabilizado
+
+    // Botão de logout
+    Button buttonLogout;
     private boolean destroyed = false;
     @SuppressLint("SetTextI18n")
     @Override
@@ -38,6 +45,7 @@ public final class EstadoPage extends Fragment {
         textViewEstado = rootView.findViewById(R.id.textViewEstado);
         textViewTempoTrabalhoContabilizado = rootView.findViewById(R.id.textViewTempoTrabalhoContabilizado);
         switchLigado = rootView.findViewById(R.id.switchLigado);
+        buttonLogout = rootView.findViewById(R.id.buttonLogout);
         Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
         handleSwitch();
         // Colocar o nome do utilizador no ecrã
@@ -89,7 +97,14 @@ public final class EstadoPage extends Fragment {
             }
         };
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
-
+        // Acção do botão de logout
+        buttonLogout.setOnClickListener(v -> {
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+            mAuth.signOut();
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            startActivity(intent);
+            getActivity().finish();
+        });
         return rootView;
     }
 
@@ -99,9 +114,11 @@ public final class EstadoPage extends Fragment {
     private void handleSwitch(){
         boolean monitorServiceOngoing = MonitoringService.onGoing(getContext());
         switchLigado.setChecked(monitorServiceOngoing);
+        buttonLogout.setEnabled(!monitorServiceOngoing);
         // Código para lidar com a mudança de estado "ON/OFF" do Switch
         switchLigado.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {// O Switch está ligado
+                buttonLogout.setEnabled(false); // O utilizador só faz logout se não estiver a ser monitorizado.
                 EstadoApp.setDentroDaAreaParado(); // "Em pausa..."
                 if(getActivity() == null) {
                     throw new RuntimeException("EstadoPage: handleSwitch(ON): getActivity is null");
@@ -109,6 +126,7 @@ public final class EstadoPage extends Fragment {
                 Intent monitoringService = new Intent(getActivity(), MonitoringService.class);
                 getActivity().startForegroundService(monitoringService);
             } else {// O Switch está desligado
+                buttonLogout.setEnabled(true);
                 Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
                 EstadoApp.setDesligado();
                 // Adiciona o registo na base de dados
