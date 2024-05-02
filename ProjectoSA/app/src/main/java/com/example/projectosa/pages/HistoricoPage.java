@@ -18,14 +18,20 @@ import com.example.projectosa.data.WorkTime;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
-import java.time.LocalDate;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
 public class HistoricoPage extends Fragment {
     TextView textViewEstado_historico, textViewTempo_historico;
+
+    private LineChart lineChart;
     TableLayout tableLayout;
     private boolean destroyed = false;
     @Override
@@ -62,13 +68,22 @@ public class HistoricoPage extends Fragment {
             }
         };
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
-        // Preencher a tabela de histórico
+
+        // Preencher a tabela de histórico e o plot
+        lineChart = rootView.findViewById(R.id.lineChart);
+        List<Entry> entries = new ArrayList<>();
         Database.getWorkTimeHistoryOfUser().addOnSuccessListener((List<WorkTime> workTimes) -> {
             List<WorkTime> registosOrd = WorkTime.reduce(workTimes).values().stream().sorted((w1,w2) ->
                         w2.getData().compareTo(w1.getData())).collect(Collectors.toList());
+            int i = 0;
             for(WorkTime wt: registosOrd){
-                addTableRow(rootView, wt);
+                entries.add(new Entry(i++, (float) wt.getSegundosDeTrabalho() /3600));
+                addTableRow(rootView, wt); // tabela
             }
+            LineDataSet dataSet = new LineDataSet(entries, "Tempo de trabalho diário");
+            LineData lineData = new LineData(dataSet);
+            lineChart.setData(lineData);
+            lineChart.invalidate();
         }).addOnFailureListener(e -> {
             try {
                 throw e;
