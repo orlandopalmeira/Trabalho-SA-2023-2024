@@ -26,6 +26,7 @@ public class EstadoApp {
     private static int currentState = DESLIGADO; // estado da monitorização
     private static final List<Observer<Integer>> observersEstado = new ArrayList<>(); // Observadores do estado da aplicação
     private static Float oldXacc = 0.0f, oldYacc = 0.0f, oldZacc = 0.0f; // valores do acelerómetro anteriores
+    private static final List<Observer<Float[]>> observersAccelerometer = new ArrayList<>();
     private static Long milissegundosDeTrabalho = 0L; // Tempo de trabalho útil (em movimento e dentro da geovedação) contabilizado.
     private static long startTime = 0;
     private static final List<Observer<Long>> observersSegundosTrabalho = new ArrayList<>();
@@ -37,6 +38,9 @@ public class EstadoApp {
 
     private EstadoApp() {} // Esta classe não foi feita para ser instanciada.
 
+    public static long getWorkTime(){
+        return milissegundosDeTrabalho;
+    }
     /**
      * Actualiza a localização actual
      */
@@ -119,7 +123,9 @@ public class EstadoApp {
                 }
             }
         }
-
+        for(Observer<Float[]> observer: observersAccelerometer) {
+            observer.onVariableChanged(new Float[]{x,y,z});
+        }
         oldXacc = x; oldYacc = y; oldZacc = z; // Actualiza os valores do acelerómetro
     }
     public static void registerLocationObserver(Observer<LatLng> observer){
@@ -131,6 +137,11 @@ public class EstadoApp {
     public static void registerSegundosTrabalhoObserver(Observer<Long> observer){
         observersSegundosTrabalho.add(observer);
     }
+
+    public static void registerAccelerometerObserver(Observer<Float[]> observer){
+        observersAccelerometer.add(observer);
+    }
+
     public static void setDesligado() {
         currentState = DESLIGADO;
         for (Observer<Integer> observer: observersEstado) {

@@ -19,7 +19,6 @@ public class LocationHelper {
     private final Context context;
     private final LocationManager locationManager;
     private final LocationListener locationListener;
-    private static boolean dontRepeat = false;
 
     public LocationHelper(Context context, Observer<LatLng> locationObserver) {
         this.context = context;
@@ -52,8 +51,6 @@ public class LocationHelper {
             Toast.makeText(context, "Permissão de localização não concedida.", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (dontRepeat) return;
-        dontRepeat = true;
         Toast.makeText(context, "Existem permissões de localização", Toast.LENGTH_SHORT).show();
         // Registar para receber atualizações de localização
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
