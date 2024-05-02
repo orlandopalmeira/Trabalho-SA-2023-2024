@@ -36,7 +36,18 @@ public class EstadoApp {
     private static final List<Observer<LatLng>> locationObservers = new ArrayList<>(); // observadores da localização
     private static boolean insideGeofences = false;
 
+    // Informações do utilizador
+    private static String username;
+
     private EstadoApp() {} // Esta classe não foi feita para ser instanciada.
+
+    public static void setUsername(String username) {
+        EstadoApp.username = username;
+    }
+
+    public static String getUsername(){
+        return username;
+    }
 
     public static long getWorkTime(){
         return milissegundosDeTrabalho;

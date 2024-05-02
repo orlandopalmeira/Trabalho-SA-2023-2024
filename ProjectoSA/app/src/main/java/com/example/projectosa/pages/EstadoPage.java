@@ -1,5 +1,6 @@
 package com.example.projectosa.pages;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -21,14 +22,15 @@ import com.example.projectosa.utils.Utils;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 
-import java.util.Locale;
+import java.time.LocalDateTime;
 
 public final class EstadoPage extends Fragment {
     TextView textViewEstado; // Indica o estado actual da aplicação (Desligado, Fora da área de trabalho, ...)
     SwitchCompat switchLigado; // Activa ou desactiva a monitorização da aplicação.
-    TextView viewX, viewY, viewZ; // textviews para se ver os valores do acelerómetro
+    //TextView viewX, viewY, viewZ; // textviews para se ver os valores do acelerómetro
     TextView textViewTempoTrabalhoContabilizado; // textview que mostra ao utilizador o tempo de trabalho que já foi contabilizado
     private boolean destroyed = false;
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -37,11 +39,28 @@ public final class EstadoPage extends Fragment {
         textViewTempoTrabalhoContabilizado = rootView.findViewById(R.id.textViewTempoTrabalhoContabilizado);
         switchLigado = rootView.findViewById(R.id.switchLigado);
         Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
-        viewX = rootView.findViewById(R.id.textViewX);
-        viewY = rootView.findViewById(R.id.textViewY);
-        viewZ = rootView.findViewById(R.id.textViewZ);
         handleSwitch();
-
+        // Colocar o nome do utilizador no ecrã
+        ((TextView)rootView.findViewById(R.id.textViewUserName)).setText(EstadoApp.getUsername());
+        // Colocar as informações do registo mais recente
+        TextView textViewUltimoRegisto = rootView.findViewById(R.id.textViewUltimoRegisto);
+        Database.getLastWorkTimeInfo().addOnSuccessListener(workTime -> {
+            if(workTime == null) {
+                textViewUltimoRegisto.setText("Sem registo...");
+            } else {
+                LocalDateTime data = workTime.getData();
+                int dia = data.getDayOfMonth(), mes = data.getMonthValue(), ano = data.getYear();
+                long tempoDeTrabalho = workTime.getSegundosDeTrabalho();
+                String text = dia + "/" + mes + "/" + ano + " " + Utils.milisecondsToFormattedString(tempoDeTrabalho * 1000);
+                textViewUltimoRegisto.setText(text);
+            }
+        }).addOnFailureListener(e -> {
+            try {
+                throw e;
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
         Observer<Integer> textViewEstadoObserver = novoEstado -> {
             if(!destroyed) {
@@ -70,25 +89,8 @@ public final class EstadoPage extends Fragment {
             }
         };
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
-        // Observer para os valores do acelerómetro
-        Observer<Float[]> observerAccelerometer = coords -> {
-            if(!destroyed) {
-                actualizarInfoAcelerometro(coords[0], coords[1], coords[2]);
-            }
-        };
-        EstadoApp.registerAccelerometerObserver(observerAccelerometer);
 
         return rootView;
-    }
-
-    /**
-     * Actualiza os valores do acelerómetro no ecrã e o estado da aplicação.
-     */
-    private void actualizarInfoAcelerometro(Float x, Float y, Float z){
-        String casasDecimais = "%.6f"; // 6 casas decimais
-        viewX.setText(String.format(Locale.getDefault(), casasDecimais, x)); // Locale.getDefault() serve para evitar warnings
-        viewY.setText(String.format(Locale.getDefault(), casasDecimais, y));
-        viewZ.setText(String.format(Locale.getDefault(), casasDecimais, z));
     }
 
     /**

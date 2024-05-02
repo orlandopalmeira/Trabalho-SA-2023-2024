@@ -8,11 +8,17 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 /**
  * Classe que controla interacções com a base de dados
@@ -76,14 +82,54 @@ public class Database {
         // asynchronous operation
         new Thread(() -> {
             try {
-                Task<QuerySnapshot> task = dbWorkTime.whereEqualTo("idTrabalhador", userId).get();
+                Task<QuerySnapshot> task = dbWorkTime.whereEqualTo("idTrabalhador", userId)
+                                            .orderBy("data", Query.Direction.DESCENDING).get();
                 QuerySnapshot querySnapshot = Tasks.await(task);
                 List<Object> resultobjects = querySnapshot.toObjects(Object.class);
                 List<WorkTime> result = new ArrayList<>(resultobjects.size());
                 for (Object o: resultobjects) {
-                    result.add(WorkTime.fromMap( (Map<String, Object>) o));
+                    result.add(WorkTime.fromMap((Map<String, Object>) o));
                 }
                 source.setResult(result);
+            } catch (Exception e) {
+                source.setException(e);
+            }
+        }).start();
+
+        return source.getTask();
+    }
+
+    public static Task<WorkTime> getLastWorkTimeInfo(){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference dbWorkTime = db.collection("work_time");
+        assert FirebaseAuth.getInstance().getCurrentUser() != null; // evita warnigns
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        TaskCompletionSource<WorkTime> source = new TaskCompletionSource<>();
+        // Obtém a data actual
+        LocalDateTime hoje = LocalDate.now().atStartOfDay(); // atStartOfDay significa meia-noite
+        // Formata a data actual para comparar com os dados no Firestore
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        String hojeFormatado = hoje.format(formatter);
+        // Query
+        Task<QuerySnapshot> task = dbWorkTime.whereEqualTo("idTrabalhador", userId)
+                                    .whereLessThan("data", hojeFormatado)
+                                    .orderBy("data", Query.Direction.DESCENDING).get();
+        // asynchronous operation
+        new Thread(() -> {
+            try {
+                List<Object> objects = Tasks.await(task).toObjects(Object.class);
+                if(objects.size() == 0){
+                    source.setResult(null);
+                } else {
+                    List<WorkTime> workTimesList = objects.stream()
+                            .map(obj -> WorkTime.fromMap((Map<String, Object>) obj))
+                            .collect(Collectors.toList());
+                    WorkTime result = WorkTime.reduce(workTimesList).values().stream()
+                            .sorted((w1, w2) -> w2.getData().compareTo(w1.getData()))
+                            .collect(Collectors.toList()).get(0);
+                    source.setResult(result);
+                }
             } catch (Exception e) {
                 source.setException(e);
             }

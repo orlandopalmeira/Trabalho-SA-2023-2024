@@ -21,6 +21,7 @@ import com.example.projectosa.utils.Utils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class HistoricoPage extends Fragment {
@@ -63,8 +64,9 @@ public class HistoricoPage extends Fragment {
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
         // Preencher a tabela de histórico
         Database.getWorkTimeHistoryOfUser().addOnSuccessListener((List<WorkTime> workTimes) -> {
-            Map<LocalDate,WorkTime> registos = WorkTime.reduce(workTimes);
-            for(WorkTime wt: registos.values()){
+            List<WorkTime> registosOrd = WorkTime.reduce(workTimes).values().stream().sorted((w1,w2) ->
+                        w2.getData().compareTo(w1.getData())).collect(Collectors.toList());
+            for(WorkTime wt: registosOrd){
                 addTableRow(rootView, wt);
             }
         }).addOnFailureListener(e -> {
