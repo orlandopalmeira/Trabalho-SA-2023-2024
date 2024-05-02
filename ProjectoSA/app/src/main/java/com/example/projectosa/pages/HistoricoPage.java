@@ -2,7 +2,6 @@ package com.example.projectosa.pages;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.Gravity;
@@ -12,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.projectosa.R;
 import com.example.projectosa.data.Database;
@@ -20,22 +18,17 @@ import com.example.projectosa.data.WorkTime;
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Observer;
 import com.example.projectosa.utils.Utils;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 
 public class HistoricoPage extends Fragment {
-
     TextView textViewEstado_historico, textViewTempo_historico;
     TableLayout tableLayout;
+    private boolean destroyed = false;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_historico_page, container, false);
         textViewEstado_historico = rootView.findViewById(R.id.textViewEstado_historico);
@@ -43,19 +36,30 @@ public class HistoricoPage extends Fragment {
 
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
         Observer<Integer> textViewEstadoObserver = novoEstado -> {
-            switch (novoEstado){
-                case EstadoApp.DESLIGADO: Utils.coloredTextView(textViewEstado_historico, "red", "Desligado", this); break;
-                case EstadoApp.FORA_DA_AREA: {
-                    Utils.coloredTextView(textViewEstado_historico, "red", "Fora da área de trabalho", this);
-                    break;
+            if(!destroyed) {
+                switch (novoEstado) {
+                    case EstadoApp.DESLIGADO:
+                        Utils.coloredTextView(textViewEstado_historico, "red", "Desligado", this);
+                        break;
+                    case EstadoApp.FORA_DA_AREA:
+                        Utils.coloredTextView(textViewEstado_historico, "red", "Fora da área de trabalho", this);
+                        break;
+                    case EstadoApp.DENTRO_AREA_PARADO:
+                        Utils.coloredTextView(textViewEstado_historico, "red", "Em pausa", this);
+                        break;
+                    case EstadoApp.DENTRO_AREA_EM_MOVIMENTO:
+                        Utils.coloredTextView(textViewEstado_historico, "green", "Trabalho em curso...", this);
+                        break;
                 }
-                case EstadoApp.DENTRO_AREA_PARADO: Utils.coloredTextView(textViewEstado_historico, "red", "Em pausa", this); break;
-                case EstadoApp.DENTRO_AREA_EM_MOVIMENTO: Utils.coloredTextView(textViewEstado_historico, "green", "Trabalho em curso...", this); break;
             }
         };
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
         // Este observer permite à textView do tempo contabilizado ser actualizada
-        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> textViewTempo_historico.setText(Utils.milisecondsToFormattedString(novoTempo));
+        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> {
+            if(!destroyed) {
+                textViewTempo_historico.setText(Utils.milisecondsToFormattedString(novoTempo));
+            }
+        };
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
         // Preencher a tabela de histórico
         Database.getWorkTimeHistoryOfUser().addOnSuccessListener((List<WorkTime> workTimes) -> {
@@ -69,7 +73,6 @@ public class HistoricoPage extends Fragment {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-            //Toast.makeText(rootView.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         });
 
         return rootView;
@@ -112,5 +115,11 @@ public class HistoricoPage extends Fragment {
 
         // Adiciona a TableRow ao TableLayout
         tableLayout.addView(tableRow);
+    }
+
+    @Override
+    public void onDestroy() {
+        destroyed = true;
+        super.onDestroy();
     }
 }

@@ -38,6 +38,8 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
     private GoogleMap map;
     private Marker mapMarker;
 
+    private boolean destroyed = false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -46,19 +48,31 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
         textViewTempo_mapa = rootView.findViewById(R.id.textViewTempo_mapa);
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
         Observer<Integer> textViewEstadoObserver = novoEstado -> {
-            switch (novoEstado){
-                case EstadoApp.DESLIGADO: Utils.coloredTextView(textViewEstado_mapa, "red", "Desligado", this); break;
-                case EstadoApp.FORA_DA_AREA: {
-                    Utils.coloredTextView(textViewEstado_mapa, "red", "Fora da área de trabalho", this);
-                    break;
+            if(!destroyed) {
+                switch (novoEstado) {
+                    case EstadoApp.DESLIGADO:
+                        Utils.coloredTextView(textViewEstado_mapa, "red", "Desligado", this);
+                        break;
+                    case EstadoApp.FORA_DA_AREA: {
+                        Utils.coloredTextView(textViewEstado_mapa, "red", "Fora da área de trabalho", this);
+                        break;
+                    }
+                    case EstadoApp.DENTRO_AREA_PARADO:
+                        Utils.coloredTextView(textViewEstado_mapa, "red", "Em pausa", this);
+                        break;
+                    case EstadoApp.DENTRO_AREA_EM_MOVIMENTO:
+                        Utils.coloredTextView(textViewEstado_mapa, "green", "Trabalho em curso...", this);
+                        break;
                 }
-                case EstadoApp.DENTRO_AREA_PARADO: Utils.coloredTextView(textViewEstado_mapa, "red", "Em pausa", this); break;
-                case EstadoApp.DENTRO_AREA_EM_MOVIMENTO: Utils.coloredTextView(textViewEstado_mapa, "green", "Trabalho em curso...", this); break;
             }
         };
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
         // Este observer permite à textView do tempo contabilizado ser actualizada
-        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> textViewTempo_mapa.setText(Utils.milisecondsToFormattedString(novoTempo));
+        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> {
+            if(!destroyed) {
+                textViewTempo_mapa.setText(Utils.milisecondsToFormattedString(novoTempo));
+            }
+        };
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
 
         // Mapa
@@ -153,5 +167,11 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
             mapMarker = map.addMarker(new MarkerOptions().position(EstadoApp.getCurrentLocation()));
         };
         EstadoApp.registerLocationObserver(locationObserver);
+    }
+
+    @Override
+    public void onDestroy() {
+        destroyed = true;
+        super.onDestroy();
     }
 }

@@ -28,7 +28,7 @@ public final class EstadoPage extends Fragment {
     SwitchCompat switchLigado; // Activa ou desactiva a monitorização da aplicação.
     TextView viewX, viewY, viewZ; // textviews para se ver os valores do acelerómetro
     TextView textViewTempoTrabalhoContabilizado; // textview que mostra ao utilizador o tempo de trabalho que já foi contabilizado
-
+    private boolean destroyed = false;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -44,22 +44,38 @@ public final class EstadoPage extends Fragment {
 
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
         Observer<Integer> textViewEstadoObserver = novoEstado -> {
-            switch (novoEstado){
-                case EstadoApp.DESLIGADO: Utils.coloredTextView(textViewEstado, "red", "Desligado", this); break;
-                case EstadoApp.FORA_DA_AREA: {
-                    Utils.coloredTextView(textViewEstado, "red", "Fora da área de trabalho", this);
-                    break;
+            if(!destroyed) {
+                switch (novoEstado) {
+                    case EstadoApp.DESLIGADO:
+                        Utils.coloredTextView(textViewEstado, "red", "Desligado", this);
+                        break;
+                    case EstadoApp.FORA_DA_AREA: {
+                        Utils.coloredTextView(textViewEstado, "red", "Fora da área de trabalho", this);
+                        break;
+                    }
+                    case EstadoApp.DENTRO_AREA_PARADO:
+                        Utils.coloredTextView(textViewEstado, "red", "Em pausa", this);
+                        break;
+                    case EstadoApp.DENTRO_AREA_EM_MOVIMENTO:
+                        Utils.coloredTextView(textViewEstado, "green", "Trabalho em curso...", this);
+                        break;
                 }
-                case EstadoApp.DENTRO_AREA_PARADO: Utils.coloredTextView(textViewEstado, "red", "Em pausa", this); break;
-                case EstadoApp.DENTRO_AREA_EM_MOVIMENTO: Utils.coloredTextView(textViewEstado, "green", "Trabalho em curso...", this); break;
             }
         };
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
         // Este observer permite à textView do tempo contabilizado ser actualizada
-        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> textViewTempoTrabalhoContabilizado.setText(Utils.milisecondsToFormattedString(novoTempo));
+        Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> {
+            if(!destroyed) {
+                textViewTempoTrabalhoContabilizado.setText(Utils.milisecondsToFormattedString(novoTempo));
+            }
+        };
         EstadoApp.registerSegundosTrabalhoObserver(textViewSegundosTrabalhoObserver);
         // Observer para os valores do acelerómetro
-        Observer<Float[]> observerAccelerometer = coords -> actualizarInfoAcelerometro(coords[0], coords[1], coords[2]);
+        Observer<Float[]> observerAccelerometer = coords -> {
+            if(!destroyed) {
+                actualizarInfoAcelerometro(coords[0], coords[1], coords[2]);
+            }
+        };
         EstadoApp.registerAccelerometerObserver(observerAccelerometer);
 
         return rootView;
@@ -79,6 +95,8 @@ public final class EstadoPage extends Fragment {
      * Prepara tudo o que é relativo ao switch que o utilizador usa para indicar se quer ou não a monitorização da aplicação.
      * */
     private void handleSwitch(){
+        boolean monitorServiceOngoing = MonitoringService.onGoing(getContext());
+        switchLigado.setChecked(monitorServiceOngoing);
         // Código para lidar com a mudança de estado "ON/OFF" do Switch
         switchLigado.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {// O Switch está ligado
@@ -111,4 +129,9 @@ public final class EstadoPage extends Fragment {
         });
     }
 
+    @Override
+    public void onDestroy() {
+        destroyed = true;
+        super.onDestroy();
+    }
 }

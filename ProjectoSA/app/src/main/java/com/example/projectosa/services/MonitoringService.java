@@ -1,6 +1,7 @@
 package com.example.projectosa.services;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -39,6 +40,17 @@ public class MonitoringService extends Service implements SensorEventListener {
     private SensorManager sensorManager;
     private LocationHelper locationHelper;
 
+    public static boolean onGoing(Context context){
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (MonitoringService.class.getName().equals(service.service.getClassName())) {
+                if (service.foreground) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     @Override
     public void onCreate() {
         super.onCreate();

@@ -81,4 +81,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     public ViewPager2 getViewPager(){
         return viewPager;
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finish();
+    }
 }
