@@ -1,5 +1,6 @@
 package com.example.projectosa.data;
 
+import com.example.projectosa.state.EstadoApp;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -13,20 +14,22 @@ public class Position {
 
     private String idTrabalhador;
 
+    private String username;
     Position(){}
 
+    public Position(double latitude, double longitude, LocalDateTime timestamp, String idTrabalhador, String username) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.timestamp = timestamp;
+        this.idTrabalhador = idTrabalhador;
+        this.username = username;
+    }
     public Position(double latitude, double longitude, LocalDateTime timestamp, String idTrabalhador) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
         this.idTrabalhador = idTrabalhador;
-    }
-
-    public Position(double latitude, double longitude, LocalDateTime timestamp) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.timestamp = timestamp;
-        this.idTrabalhador = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        this.username = EstadoApp.getUsername();
     }
 
     public Position(LatLng latlng){
@@ -34,6 +37,7 @@ public class Position {
         this.longitude = latlng.longitude;
         this.timestamp = LocalDateTime.now();
         this.idTrabalhador = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        this.username = EstadoApp.getUsername();
     }
     // Método para converter uma instância da classe Position em um Map
     public Map<String, Object> toMap() {
@@ -42,6 +46,7 @@ public class Position {
         map.put("longitude", this.longitude);
         map.put("timestamp", this.timestamp.toString());
         map.put("idTrabalhador", this.idTrabalhador);
+        map.put("username", this.username);
         return map;
     }
 
@@ -51,7 +56,8 @@ public class Position {
         double longitude = (double) map.get("longitude");
         LocalDateTime timestamp = LocalDateTime.parse((String)map.get("timestamp"));
         String idTrabalhador = (String)map.get("idTrabalhador");
-        return new Position(latitude, longitude, timestamp, idTrabalhador);
+        String username = (String)map.get("username");
+        return new Position(latitude, longitude, timestamp, idTrabalhador,username);
     }
 
 }

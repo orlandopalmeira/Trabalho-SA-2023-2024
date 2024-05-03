@@ -1,5 +1,7 @@
 package com.example.projectosa.data;
 
+import com.example.projectosa.state.EstadoApp;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -7,12 +9,20 @@ import java.util.Map;
 
 public class WorkTime implements Comparable<WorkTime>{
     private String idTrabalhador;
+    private String username;
     private LocalDateTime data; // data em que foi feito o registo
     private long segundosDeTrabalho;
 
     public WorkTime(){} // Necessário ao firebase
+    public WorkTime(String idTrabalhador, String username, LocalDateTime today, long segundosDeTrabalho) {
+        this.idTrabalhador = idTrabalhador;
+        this.username = username;
+        this.data = today;
+        this.segundosDeTrabalho = segundosDeTrabalho;
+    }
     public WorkTime(String idTrabalhador, LocalDateTime today, long segundosDeTrabalho) {
         this.idTrabalhador = idTrabalhador;
+        this.username = EstadoApp.getUsername();
         this.data = today;
         this.segundosDeTrabalho = segundosDeTrabalho;
     }
@@ -22,6 +32,7 @@ public class WorkTime implements Comparable<WorkTime>{
      * */
     public WorkTime(String idTrabalhador, long segundosDeTrabalho){
         this.idTrabalhador = idTrabalhador;
+        this.username = EstadoApp.getUsername();
         this.data = LocalDateTime.now();
         this.segundosDeTrabalho = segundosDeTrabalho;
     }
@@ -81,9 +92,10 @@ public class WorkTime implements Comparable<WorkTime>{
      */
     public static WorkTime fromMap(Map<String, Object> map) {
         String idTrabalhador = (String) map.get("idTrabalhador");
+        String username = (String) map.get("username");
         LocalDateTime data = LocalDateTime.parse((String)map.get("data"));
         long segundosDeTrabalho = (Long) map.get("segundosDeTrabalho");
-        return new WorkTime(idTrabalhador, data, segundosDeTrabalho);
+        return new WorkTime(idTrabalhador, username, data, segundosDeTrabalho);
     }
 
     /**
@@ -92,6 +104,7 @@ public class WorkTime implements Comparable<WorkTime>{
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("idTrabalhador", idTrabalhador);
+        map.put("username", username);
         map.put("data", data.toString());
         map.put("segundosDeTrabalho", segundosDeTrabalho);
         return map;
