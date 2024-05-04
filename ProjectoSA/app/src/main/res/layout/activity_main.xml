@@ -39,6 +39,12 @@
             android:text="@string/tabEstado" />
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/tabViagem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tabViagem" />
+
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/tabMapa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

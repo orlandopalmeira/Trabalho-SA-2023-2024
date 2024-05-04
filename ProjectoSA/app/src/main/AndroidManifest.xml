@@ -43,6 +43,8 @@
             android:value="@string/google_maps_api_key" />
         <service android:name=".services.MonitoringService"
             android:foregroundServiceType="specialUse"/>
+        <service android:name=".services.MonitoringTripService"
+            android:foregroundServiceType="specialUse"/>
     </application>
 
 </manifest>

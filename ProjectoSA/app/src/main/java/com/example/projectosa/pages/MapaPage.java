@@ -47,25 +47,7 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
         textViewEstado_mapa = rootView.findViewById(R.id.textViewEstado_mapa);
         textViewTempo_mapa = rootView.findViewById(R.id.textViewTempo_mapa);
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
-        Observer<Integer> textViewEstadoObserver = novoEstado -> {
-            if(!destroyed) {
-                switch (novoEstado) {
-                    case EstadoApp.DESLIGADO:
-                        Utils.coloredTextView(textViewEstado_mapa, "red", "Desligado", this);
-                        break;
-                    case EstadoApp.FORA_DA_AREA: {
-                        Utils.coloredTextView(textViewEstado_mapa, "red", "Fora da área de trabalho", this);
-                        break;
-                    }
-                    case EstadoApp.DENTRO_AREA_PARADO:
-                        Utils.coloredTextView(textViewEstado_mapa, "red", "Em pausa", this);
-                        break;
-                    case EstadoApp.DENTRO_AREA_EM_MOVIMENTO:
-                        Utils.coloredTextView(textViewEstado_mapa, "green", "Trabalho em curso...", this);
-                        break;
-                }
-            }
-        };
+        Observer<Integer> textViewEstadoObserver = new EstadoObserverTextView(textViewTempo_mapa, this);
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
         // Este observer permite à textView do tempo contabilizado ser actualizada
         Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> {

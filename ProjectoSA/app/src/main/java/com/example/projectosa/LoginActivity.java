@@ -72,6 +72,7 @@ public class LoginActivity extends AppCompatActivity {
         if(user != null){ // Já está autenticado
             // Guardar o nome do utilizador no estado da aplicação
             EstadoApp.setUsername(user.getDisplayName());
+            EstadoApp.setUserID(user.getUid());
             // Direcionar o utilizador para a próxima activity
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
@@ -87,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     AuthResult result = task.getResult();
                     EstadoApp.setUsername(result.getUser().getDisplayName());
+                    EstadoApp.setUserID(result.getUser().getUid());
                     // Direcionar o utilizador para a próxima activity
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);

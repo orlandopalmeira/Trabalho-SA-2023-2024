@@ -21,6 +21,7 @@ public class EstadoApp {
     public static final int FORA_DA_AREA = 1;
     public static final int DENTRO_AREA_PARADO = 2;
     public static final int DENTRO_AREA_EM_MOVIMENTO = 3;
+    public static final int LIGADO_EM_VIAGEM = 4;
 
     // Estado da aplicação
     private static int currentState = DESLIGADO; // estado da monitorização
@@ -35,9 +36,11 @@ public class EstadoApp {
     private static LatLng currentLocation = null; // localização actual
     private static final List<Observer<LatLng>> locationObservers = new ArrayList<>(); // observadores da localização
     private static boolean insideGeofences = false;
+    private static String viagemID = "";
 
     // Informações do utilizador
     private static String username;
+    private static String userID;
 
     private EstadoApp() {} // Esta classe não foi feita para ser instanciada.
 
@@ -47,6 +50,22 @@ public class EstadoApp {
 
     public static String getUsername(){
         return username;
+    }
+
+    public static String getUserID() {
+        return userID;
+    }
+
+    public static void setUserID(String userID) {
+        EstadoApp.userID = userID;
+    }
+
+    public static String getViagemID() {
+        return viagemID;
+    }
+
+    public static void setViagemID(String viagemID) {
+        EstadoApp.viagemID = viagemID;
     }
 
     public static long getWorkTime(){
@@ -64,6 +83,13 @@ public class EstadoApp {
                 catch (Exception ex) { throw new RuntimeException(ex); }
             });
         }
+        for (Observer<LatLng> observer : locationObservers) {
+            observer.onVariableChanged(currentLocation);
+        }
+    }
+
+    public static void setCurrentLocationOnly(LatLng newLocation) {
+        currentLocation = newLocation;
         for (Observer<LatLng> observer : locationObservers) {
             observer.onVariableChanged(currentLocation);
         }
@@ -179,12 +205,24 @@ public class EstadoApp {
             observer.onVariableChanged(currentState);
         }
     }
+    public static void setLigadoEmViagem() {
+        currentState = LIGADO_EM_VIAGEM;
+        for (Observer<Integer> observer: observersEstado) {
+            observer.onVariableChanged(currentState);
+        }
+    }
     private static void updateSegundosDeTrabalho(){
         if(moving){
             long endTime = SystemClock.elapsedRealtime();
             milissegundosDeTrabalho += endTime - startTime;
             moving = false;
         }
+        for(Observer<Long> observer: observersSegundosTrabalho){
+            observer.onVariableChanged(milissegundosDeTrabalho);
+        }
+    }
+    public static void increaseWorkTime(long moretime){
+        milissegundosDeTrabalho += moretime;
         for(Observer<Long> observer: observersSegundosTrabalho){
             observer.onVariableChanged(milissegundosDeTrabalho);
         }

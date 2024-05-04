@@ -15,14 +15,15 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position){
             //case 0: return new EstadoPage();
-            case 1: return new MapaPage();
-            case 2: return new HistoricoPage();
+            case 1: return new ViagemPage();
+            case 2: return new MapaPage();
+            case 3: return new HistoricoPage();
             default: return new EstadoPage();
         }
     }
 
     @Override
     public int getItemCount() {
-        return 3; // retornar o número de tabs que temos
+        return 4; // retornar o número de tabs que temos
     }
 }

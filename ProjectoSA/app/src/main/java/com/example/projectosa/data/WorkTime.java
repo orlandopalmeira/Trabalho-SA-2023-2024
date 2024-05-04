@@ -8,23 +8,40 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WorkTime implements Comparable<WorkTime>{
+    public static final String VIAGEM = "viagem", PEDONAL = "pedonal";
     private String idTrabalhador;
     private String username;
     private LocalDateTime data; // data em que foi feito o registo
     private long segundosDeTrabalho;
+    private String tipoTrabalho;
+    private String viagemID;
 
     public WorkTime(){} // Necessário ao firebase
+
+    public WorkTime(String idTrabalhador, String username, LocalDateTime today, long segundosDeTrabalho, String tipoTrabalho, String viagemID) {
+        this.idTrabalhador = idTrabalhador;
+        this.username = username;
+        this.data = today;
+        this.segundosDeTrabalho = segundosDeTrabalho;
+        this.tipoTrabalho = tipoTrabalho;
+        this.viagemID = viagemID;
+    }
+
     public WorkTime(String idTrabalhador, String username, LocalDateTime today, long segundosDeTrabalho) {
         this.idTrabalhador = idTrabalhador;
         this.username = username;
         this.data = today;
         this.segundosDeTrabalho = segundosDeTrabalho;
+        this.tipoTrabalho = PEDONAL;
+        this.viagemID = "";
     }
     public WorkTime(String idTrabalhador, LocalDateTime today, long segundosDeTrabalho) {
         this.idTrabalhador = idTrabalhador;
         this.username = EstadoApp.getUsername();
         this.data = today;
         this.segundosDeTrabalho = segundosDeTrabalho;
+        this.tipoTrabalho = PEDONAL;
+        this.viagemID = "";
     }
 
     /**
@@ -35,6 +52,8 @@ public class WorkTime implements Comparable<WorkTime>{
         this.username = EstadoApp.getUsername();
         this.data = LocalDateTime.now();
         this.segundosDeTrabalho = segundosDeTrabalho;
+        this.tipoTrabalho = PEDONAL;
+        this.viagemID = "";
     }
 
     /**
@@ -66,12 +85,28 @@ public class WorkTime implements Comparable<WorkTime>{
         this.idTrabalhador = idTrabalhador;
     }
 
+    public String getViagemID() {
+        return viagemID;
+    }
+
+    public void setViagemID(String viagemID) {
+        this.viagemID = viagemID;
+    }
+
     public LocalDateTime getData() {
         return data;
     }
 
     public void setData(LocalDateTime data) {
         this.data = data;
+    }
+
+    public String getTipoTrabalho() {
+        return tipoTrabalho;
+    }
+
+    public void setTipoTrabalho(String tipoTrabalho) {
+        this.tipoTrabalho = tipoTrabalho;
     }
 
     public long getSegundosDeTrabalho() {
@@ -88,14 +123,16 @@ public class WorkTime implements Comparable<WorkTime>{
     }
 
     /**
-     * Método de desserialização personalizado para converter um Map em um objeto WorkTime.
+     * Método de desserialização personalizado para converter um Map num objeto WorkTime.
      */
     public static WorkTime fromMap(Map<String, Object> map) {
         String idTrabalhador = (String) map.get("idTrabalhador");
         String username = (String) map.get("username");
         LocalDateTime data = LocalDateTime.parse((String)map.get("data"));
         long segundosDeTrabalho = (Long) map.get("segundosDeTrabalho");
-        return new WorkTime(idTrabalhador, username, data, segundosDeTrabalho);
+        String tipoTrabalho = (String) map.get("tipoTrabalho");
+        String viagemID = (String) map.get("viagemID");
+        return new WorkTime(idTrabalhador, username, data, segundosDeTrabalho, tipoTrabalho, viagemID);
     }
 
     /**
@@ -107,6 +144,8 @@ public class WorkTime implements Comparable<WorkTime>{
         map.put("username", username);
         map.put("data", data.toString());
         map.put("segundosDeTrabalho", segundosDeTrabalho);
+        map.put("tipoTrabalho", tipoTrabalho);
+        map.put("viagemID", viagemID);
         return map;
     }
 }

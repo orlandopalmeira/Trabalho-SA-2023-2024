@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 
 import com.example.projectosa.state.EstadoApp;
 import com.example.projectosa.utils.Permissions;
@@ -82,6 +83,21 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         return viewPager;
     }
 
+    public Button getSwitchPedonalPage(){
+        return findViewById(R.id.switchLigado);
+    }
+
+    public Button getLogoutButtonPedonalPage(){
+        return findViewById(R.id.buttonLogout);
+    }
+
+    public Button getSwitchViagemPage(){
+        return findViewById(R.id.buttonLogout_Viagem);
+    }
+
+    public Button getLogoutButtonViagemPage(){
+        return findViewById(R.id.buttonLogout_Viagem);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

@@ -42,24 +42,7 @@ public class HistoricoPage extends Fragment {
         textViewTempo_historico = rootView.findViewById(R.id.textViewTempo_historico);
 
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
-        Observer<Integer> textViewEstadoObserver = novoEstado -> {
-            if(!destroyed) {
-                switch (novoEstado) {
-                    case EstadoApp.DESLIGADO:
-                        Utils.coloredTextView(textViewEstado_historico, "red", "Desligado", this);
-                        break;
-                    case EstadoApp.FORA_DA_AREA:
-                        Utils.coloredTextView(textViewEstado_historico, "red", "Fora da área de trabalho", this);
-                        break;
-                    case EstadoApp.DENTRO_AREA_PARADO:
-                        Utils.coloredTextView(textViewEstado_historico, "red", "Em pausa", this);
-                        break;
-                    case EstadoApp.DENTRO_AREA_EM_MOVIMENTO:
-                        Utils.coloredTextView(textViewEstado_historico, "green", "Trabalho em curso...", this);
-                        break;
-                }
-            }
-        };
+        Observer<Integer> textViewEstadoObserver = new EstadoObserverTextView(textViewEstado_historico, this);
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
         // Este observer permite à textView do tempo contabilizado ser actualizada
         Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> {
