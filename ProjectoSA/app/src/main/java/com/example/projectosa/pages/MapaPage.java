@@ -47,7 +47,7 @@ public class MapaPage extends Fragment implements OnMapReadyCallback {
         textViewEstado_mapa = rootView.findViewById(R.id.textViewEstado_mapa);
         textViewTempo_mapa = rootView.findViewById(R.id.textViewTempo_mapa);
         // Este observer permite à textview que apresenta o estado alterar o seu conteúdo automaticamente.
-        Observer<Integer> textViewEstadoObserver = new EstadoObserverTextView(textViewTempo_mapa, this);
+        Observer<Integer> textViewEstadoObserver = new EstadoObserverTextView(textViewEstado_mapa, this);
         EstadoApp.registerEstadoObserver(textViewEstadoObserver);
         // Este observer permite à textView do tempo contabilizado ser actualizada
         Observer<Long> textViewSegundosTrabalhoObserver = novoTempo -> {

@@ -31,7 +31,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.time.LocalDateTime;
 
-public class MonitoringTripService extends Service implements Observer<LatLng>{
+public class MonitoringTripService extends Service{
     private static final int NOTIFICATION_ID = 2;
     private static final String CHANNEL_ID = "NOTIF-CHANNEL-2";
     private NotificationManagerCompat notificationManager;
@@ -60,7 +60,22 @@ public class MonitoringTripService extends Service implements Observer<LatLng>{
         notificationChannel = new NotificationChannel(CHANNEL_ID,"Notificacoes servico foreground 2", NotificationManager.IMPORTANCE_LOW);
         notificationManager.createNotificationChannel(notificationChannel);
         // Localização
-        locationHelper = new LocationHelper(getApplicationContext(), this);
+        Observer<LatLng> observerLocation = novaLocalizacao -> {
+            // Acção quando recebe uma actualização de localização.
+            long newTimestamp = SystemClock.elapsedRealtime();
+            long elapsedTime = newTimestamp - timestamp;
+            timestamp = newTimestamp;
+            Position p = new Position(novaLocalizacao);
+            p.setTipoTrabalho(WorkTime.VIAGEM);
+            p.setViagemID(viagemID);
+            EstadoApp.setCurrentLocationOnly(novaLocalizacao);
+            EstadoApp.increaseWorkTime(elapsedTime);
+            Database.addPosition(p).addOnFailureListener(e -> {
+                try { throw e; }
+                catch (Exception ex) { throw new RuntimeException(ex); }
+            });
+        };
+        locationHelper = new LocationHelper(getApplicationContext(), observerLocation);
         // Observer do tempo de trabalho
         Observer<Long> observerTempoTrabalho = tempoTrabalho -> {
             actualizarNotificacao("Tempo contabilizado: " + Utils.milisecondsToFormattedString(tempoTrabalho));
@@ -76,23 +91,6 @@ public class MonitoringTripService extends Service implements Observer<LatLng>{
         locationHelper.requestLocationUpdates();
         timestamp = SystemClock.elapsedRealtime();
         return START_STICKY;
-    }
-
-    @Override
-    public void onVariableChanged(LatLng novaLocalizacao) {
-        // Acção quando recebe uma actualização de localização.
-        long newTimestamp = SystemClock.elapsedRealtime();
-        long elapsedTime = newTimestamp - timestamp;
-        timestamp = newTimestamp;
-        Position p = new Position(novaLocalizacao);
-        p.setTipoTrabalho(WorkTime.VIAGEM);
-        p.setViagemID(viagemID);
-        EstadoApp.setCurrentLocationOnly(novaLocalizacao);
-        EstadoApp.increaseWorkTime(elapsedTime);
-        Database.addPosition(p).addOnFailureListener(e -> {
-            try { throw e; }
-            catch (Exception ex) { throw new RuntimeException(ex); }
-        });
     }
 
     private void criarNotificacao() {

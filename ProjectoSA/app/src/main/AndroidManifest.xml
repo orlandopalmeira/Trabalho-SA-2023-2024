@@ -9,9 +9,11 @@
     <!-- Permissões para aceder à localização -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <!--Foreground service-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <!-- Permissão para notificações -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -42,9 +44,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_api_key" />
         <service android:name=".services.MonitoringService"
-            android:foregroundServiceType="specialUse"/>
+            android:foregroundServiceType="location"/>
         <service android:name=".services.MonitoringTripService"
-            android:foregroundServiceType="specialUse"/>
+            android:foregroundServiceType="location"/>
     </application>
 
 </manifest>
