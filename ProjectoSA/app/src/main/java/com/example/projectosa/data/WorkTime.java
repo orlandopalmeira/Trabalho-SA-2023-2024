@@ -77,6 +77,23 @@ public class WorkTime implements Comparable<WorkTime>{
         return  map;
     }
 
+    public static Map<LocalDate,WorkTime> reduce(Iterable<WorkTime> workTimes, String tipoTrabalho){
+        Map<LocalDate, WorkTime> map = new HashMap<>();
+        for(WorkTime wt : workTimes){
+            LocalDate date = wt.data.toLocalDate();
+            if (map.containsKey(date)) {
+                WorkTime toReduce = map.get(date);
+                long segundosTrabalho = toReduce.segundosDeTrabalho + wt.segundosDeTrabalho;
+                WorkTime newWorkTime = new WorkTime(wt.idTrabalhador, date.atStartOfDay(), segundosTrabalho);
+                newWorkTime.setTipoTrabalho(tipoTrabalho);
+                map.put(date,newWorkTime);
+            } else {
+                map.put(wt.data.toLocalDate(), wt);
+            }
+        }
+        return  map;
+    }
+
     public String getIdTrabalhador() {
         return idTrabalhador;
     }

@@ -62,6 +62,7 @@ public class MonitoringTripService extends Service{
         // Localização
         Observer<LatLng> observerLocation = novaLocalizacao -> {
             // Acção quando recebe uma actualização de localização.
+            EstadoApp.setLigadoEmViagem();
             long newTimestamp = SystemClock.elapsedRealtime();
             long elapsedTime = newTimestamp - timestamp;
             timestamp = newTimestamp;
