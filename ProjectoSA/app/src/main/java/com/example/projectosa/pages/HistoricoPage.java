@@ -1,5 +1,6 @@
 package com.example.projectosa.pages;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -54,17 +55,29 @@ public class HistoricoPage extends Fragment {
 
         // Preencher a tabela de histórico e o plot
         lineChart = rootView.findViewById(R.id.lineChart);
-        List<Entry> entries = new ArrayList<>();
+        List<Entry> entriesPedonal = new ArrayList<>(), entriesViagem = new ArrayList<>();
         Database.getWorkTimeHistoryOfUser().addOnSuccessListener((List<WorkTime> workTimes) -> {
-            List<WorkTime> registosOrd = WorkTime.reduce(workTimes).values().stream().sorted((w1,w2) ->
-                        w2.getData().compareTo(w1.getData())).collect(Collectors.toList());
+            List<WorkTime> pedonal = workTimes.stream().filter(wt -> wt.getTipoTrabalho().equals("pedonal")).collect(Collectors.toList());
+            List<WorkTime> viagem = workTimes.stream().filter(wt -> wt.getTipoTrabalho().equals("viagem")).collect(Collectors.toList());
+            List<WorkTime> pedonalOrd = WorkTime.reduce(pedonal).values().stream().sorted((w1,w2) ->  w2.getData().compareTo(w1.getData())).collect(Collectors.toList());
+            List<WorkTime> viagemOrd = WorkTime.reduce(viagem).values().stream().sorted((w1,w2) ->  w2.getData().compareTo(w1.getData())).collect(Collectors.toList());
             int i = 0;
-            for(WorkTime wt: registosOrd){
-                entries.add(new Entry(i++, (float) wt.getSegundosDeTrabalho() /3600));
-                addTableRow(rootView, wt); // tabela
+            for(WorkTime wt: pedonalOrd){
+                entriesPedonal.add(new Entry(i++, (float) wt.getSegundosDeTrabalho()/3600));
+                addTableRow(rootView, wt, WorkTime.PEDONAL); // tabela
             }
-            LineDataSet dataSet = new LineDataSet(entries, "Tempo de trabalho diário");
-            LineData lineData = new LineData(dataSet);
+            i = 0;
+            for(WorkTime wt: viagemOrd){
+                entriesViagem.add(new Entry(i++, (float) wt.getSegundosDeTrabalho()/3600));
+                addTableRow(rootView, wt, WorkTime.VIAGEM); // tabela
+            }
+            LineDataSet dataSetPedonal = new LineDataSet(entriesPedonal, "Tempo de trabalho diário (pedonal)");
+            dataSetPedonal.setColor(Color.BLUE);
+            dataSetPedonal.setValueTextColor(Color.BLACK);
+            LineDataSet dataSetViagem = new LineDataSet(entriesViagem, "Tempo de trabalho diário (viagem)");
+            dataSetViagem.setColor(Color.RED);
+            dataSetViagem.setValueTextColor(Color.BLACK);
+            LineData lineData = new LineData(dataSetPedonal, dataSetViagem);
             lineChart.setData(lineData);
             lineChart.invalidate();
         }).addOnFailureListener(e -> {
@@ -78,7 +91,8 @@ public class HistoricoPage extends Fragment {
         return rootView;
     }
 
-    private void addTableRow(View rootView, WorkTime registo){
+    private void addTableRow(View rootView, WorkTime registo, String tipoTrabalho){
+        tipoTrabalho = tipoTrabalho.equals(WorkTime.VIAGEM) ? "Viagem" : "Pedonal";
         // Cria uma nova instância de TableRow
         TableRow tableRow = new TableRow(requireContext());
 
@@ -107,8 +121,20 @@ public class HistoricoPage extends Fragment {
         textView2.setTextSize(14);
         textView2.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
-        // Adiciona o segundo TextView à TableRow
+        // Adiciona o terceiro TextView à TableRow
         tableRow.addView(textView2);
+
+        // Cria e configura o terceiro TextView
+        TextView textView3 = new TextView(requireContext());
+        textView3.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 4));
+        textView3.setText(tipoTrabalho);
+        textView3.setGravity(Gravity.CENTER_HORIZONTAL);
+        textView3.setPadding(5, 5, 5, 5);
+        textView3.setTextSize(14);
+        textView3.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
+        // Adiciona o segundo TextView à TableRow
+        tableRow.addView(textView3);
 
         // Obtém uma referência ao TableLayout do teu layout XML
         TableLayout tableLayout = rootView.findViewById(R.id.tableLayout);
