@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">ProjectoSA</string>
+    <!--Títulos das Tabs-->
+    <string name="tabMapa">Mapa</string>
+    <string name="tabEstado">Pedonal</string>
+    <string name="tabHistorico">Histórico</string>
+    <string name="tabViagem">Viagem</string>
+    <!-- Necessário para a autenticação com o Google -->
+    <string name="default_web_client_id">1014462085395-s5ss7tn1kdhgj6g9i3bd5ng1id1fkf7o.apps.googleusercontent.com</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registar geovedações ({{ admin_name }})</title>
+    <style>
+        #specialdiv {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0px 30px 0px 30px;
+        }
+        #map1, #map2 {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        table.geofences {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 5px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #navTable {
+            width: 100%;
+        }
+        td.nav {
+            padding: 0;
+            border: 0;
+            width: 50%;
+        }
+        #options div a {
+            width: 33.33%;
+        }
+        td h4 {
+            margin-left: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=..."></script>
+    <script>
+        // const urlbase = "https://orlandopalmeira.pythonanywhere.com";
+        const urlbase = "http://localhost:5000";
+        var tabela, tabelaHeader;
+        document.onreadystatechange = function () {
+            if (document.readyState == "complete") {
+                tabela = document.getElementById("tabela");
+                tabelaHeader = document.getElementById("tableHeader");
+                tabela2 = document.getElementById("tabela2");
+                tabelaHeader2 = document.getElementById("tableHeader2");
+                google.maps.event.addDomListener(window, "load", initMap);
+                google.maps.event.addDomListener(window, "load", initMap2);
+            }
+        }
+        // REGISTO DE GEOVEDAÇÕES
+
+        var defineRadius = false;
+        var center = { lat: 41.5518, lng: -8.4229 }; // Coordenadas iniciais (Braga)
+        
+        var geofences = {}; // geovedações registadas
+        var markers = {}; // Marcadores no mapa
+        var circles = {}; // Círculos no mapa
+        var geofenceId = 0; // ID da geovedação 
+        // Função para inicializar o mapa de registo de geovedações
+        function initMap() {
+            // Opções do mapa
+            var mapOptions = {
+                zoom: 16,
+                center: center,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            
+            // Criar o mapa
+            var map = new google.maps.Map(document.getElementById('map1'), mapOptions);
+            
+            google.maps.event.addListener(map, 'click', function(event) {
+                if(!defineRadius){ // Registar o centro da geofence
+                    defineRadius = true;
+                    center = event.latLng; // centro da geofence
+                    markers[geofenceId++] = new google.maps.Marker({
+                        position: center,
+                        map: map
+                    });
+                } else { // Registar o raio da geofence e consequentemente a geofence
+                    defineRadius = false;
+                    let borderPoint = event.latLng;
+                    let radius = calcularDistancia(center, borderPoint);
+                    let name = prompt("Introduza o nome da geovedação:");
+                    geofences[geofenceId-1] = {
+                        latitude: center.lat(),
+                        longitude: center.lng(),
+                        name: name,
+                        radius: radius
+                    };
+                    circles[geofenceId-1] = new google.maps.Circle({
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.35,
+                        map: map,
+                        center: center,
+                        radius: radius
+                    });
+                    addGeofenceTabela(geofences[geofenceId-1], geofenceId-1);
+                }
+            });
+        }
+        
+        function sendGeofences() {
+            if(Object.keys(geofences).length > 0){
+                let url = urlbase + '/addfirebasegeofences';
+                axios.post(url, Object.values(geofences))
+                .then(function (resposta) {
+                    alert("Geovedações registadas com sucesso!");
+                    window.location.href = urlbase + "/managegeofences"; // Redirecionar para a página inicial
+                })
+                .catch(function (erro) {
+                    console.error('Erro ao fazer o pedido:', erro);
+                });
+            }
+        }
+        
+        function calcularDistancia(latLng1, latLng2) {
+            let [lat1, lng1] = [latLng1.lat(), latLng1.lng()];
+            let [lat2, lng2] = [latLng2.lat(), latLng2.lng()];
+            const radians = (graus) => graus * Math.PI / 180;
+            const raioTerra = 6371e3; // Raio da Terra em metros
+            const l1 = radians(lat1);
+            const l2 = radians(lat2);
+            const diff1 = radians(lat2 - lat1);
+            const diff2 = radians(lng2 - lng1);
+            
+            const a = Math.sin(diff1 / 2) * Math.sin(diff1 / 2) +
+            Math.cos(l1) * Math.cos(l2) *
+            Math.sin(diff2 / 2) * Math.sin(diff2 / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            
+            const distancia = raioTerra * c;
+            return distancia;
+        }
+
+        function removerGeofence(id) {
+            circles[id].setMap(null);
+            markers[id].setMap(null);
+            delete circles[id];
+            delete markers[id];
+            delete geofences[id];
+            document.getElementById("row"+id).remove();
+            if(tabela.rows.length === 1){
+                tabelaHeader.style.display = "none";
+            }
+        }
+
+        function addGeofenceTabela(geofence, id){
+            if(tabela.rows.length === 1){
+                tabelaHeader.style.display = "table-row";
+            }
+            let row = tabela.insertRow(-1);
+            row.setAttribute("id","row"+id);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let cell4 = row.insertCell(3);
+            let cell5 = row.insertCell(4);
+            cell1.innerHTML = geofence.name;
+            cell2.innerHTML = geofence.latitude;
+            cell3.innerHTML = geofence.longitude;
+            cell4.innerHTML = geofence.radius;
+            cell5.innerHTML = "<button onclick='removerGeofence(" + id + ")'>Remover</button>";
+        }
+        
+        // Eliminação de geovedações
+        var tabela2, tabelaHeader2m, map2;
+
+        var geofences_ = {}
+        var circles_ = {}
+        function initMap2(){
+            // Opções do mapa
+            var map2Options = {
+                zoom: 16,
+                center: center,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            
+            // Criar o mapa
+            map2 = new google.maps.Map(document.getElementById('map2'), map2Options);
+
+            axios.get(urlbase + '/geofences')
+            .then(resp => {
+                let fences = resp.data;
+                for(let i = 0; i < fences.length; i++){
+                    let fence = fences[i];
+                    geofences_[fence.id] = fence;
+                    let center_ = {lat: fence.latitude, lng: fence.longitude};
+                    circles_[fence.id] = new google.maps.Circle({
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.35,
+                        map: map2,
+                        center: center_,
+                        radius: fence.radius
+                    });
+                    addGeofenceTabela2(fence, fence.id);
+                }
+            }).catch(err => {
+                alert("Erro ao obter as geovedações!");
+                console.error('Erro ao fazer o pedido:', err);
+            });
+        }
+
+        function removerGeofence2(id) {
+            if(confirm("Tem a certeza que deseja remover a geovedação?")){
+                axios.delete(urlbase + '/geofence/' + geofences_[id].id)
+                .then(resp => {
+                    alert("Geovedação removida com sucesso!");
+                    circles_[id].setMap(null);
+                    delete circles_[id];
+                    delete geofences_[id];
+                    document.getElementById("row2"+id).remove();
+                    if(tabela2.rows.length === 1){
+                        tabelaHeader2.style.display = "none";
+                    }
+                }).catch(err => {
+                    alert("Erro ao remover a geovedação!");
+                    console.error('Erro ao fazer o pedido:', err);
+                });
+            }
+        }
+
+        function addGeofenceTabela2(geofence, id){
+            if(tabela2.rows.length === 1){
+                tabelaHeader2.style.display = "table-row";
+            }
+            let row = tabela2.insertRow(-1);
+            row.setAttribute("id","row2"+id);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let cell4 = row.insertCell(3);
+            let cell5 = row.insertCell(4);
+            let cell6 = row.insertCell(5);
+            cell1.innerHTML = geofence.name;
+            cell2.innerHTML = geofence.latitude;
+            cell3.innerHTML = geofence.longitude;
+            cell4.innerHTML = geofence.radius;
+            cell5.innerHTML = `<button onclick='removerGeofence2("${id}")'>Remover do sistema</button>`;
+            cell6.innerHTML = `<button onclick=\"map2.setCenter({lat: ${geofence.latitude},lng: ${geofence.longitude}})\">Ir para a geovedação</button>`;
+        }
+    </script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+    <header class="w3-bar w3-border w3-light-grey">
+        <table id="navTable">
+            <tr>
+                <td class="nav"><h4>Gestão de geovedações</h4></td>
+                <td class="nav" id="options">
+                    <div class="w3-bar w3-light-grey">
+                        <a href="/dataviz" class="w3-bar-item w3-button">Visualização de dados</a>
+                        <a href="/managegeofences" class="w3-bar-item w3-button  w3-green">Gestão de geovedações</a>
+                        <a href="/logout" class="w3-bar-item w3-button">Logout</a>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </header>
+    <div id="specialdiv">
+        <h2>Registo de geovedações ({{ admin_name }})</h2>
+        <div id="map1"></div>
+        <button onclick="sendGeofences()" style="margin-top: 15px; margin-bottom: 10px;">Registar geovedações</button>
+        <table class="geofences" id="tabela">
+            <tr id="tableHeader" style="display: none;">
+                <th>Nome</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Raio</th>
+                <th>Remoção</th>
+            </tr>
+        </table>
+    
+        <h2>Eliminação de geovedações</h2>
+        <div id="map2"></div>
+        <table class="geofences" id="tabela2">
+            <tr id="tableHeader2" style="display: none;">
+                <th>Nome</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Raio</th>
+                <th>Remoção</th>
+                <th>Ir para a geovedação</th>
+            </tr>
+        </table>
+
+    </div>
+</body>
+</html>
