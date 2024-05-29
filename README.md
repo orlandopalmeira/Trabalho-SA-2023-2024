@@ -15,7 +15,8 @@
 
 </div>
 
-### Nota: X/20
+### Nota do trabalho de investigação: 15/20
+### Nota do trabalho prático: 18/20
 
 <h3><i>Keywords</i></h3>
 SA, Sensorização e Ambiente, sensorizacao e ambiente, uminho, miei, mei, engenharia informatica
